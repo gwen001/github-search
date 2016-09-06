@@ -153,7 +153,7 @@ class GitHubSearch
 					echo $n_found . " result(s) found, displaying ".$this->max_result.".\n";
 					$max_page = ceil( $n_found / self::GITHUB_PAGE_RESULT );
 				} else {
-					Utils::help('Cannot determine how many results has been found.');
+					echo "Nothing found.\n";
 					exit();
 				}
 				echo "\n";
