@@ -22,6 +22,8 @@ class GitHubSearch
 	
 	private $filename = null;
 	
+	private $language = null;
+	
 	private $organization = null;
 	
 	private $string = null;
@@ -65,6 +67,16 @@ class GitHubSearch
 	public function setFilename( $v ) {
 		$this->filename = trim( $v );
 		$this->addParam( 'filename', $this->filename );
+		return true;
+	}
+	
+	
+	public function getLanguage() {
+		return $this->language;
+	}
+	public function setLanguage( $v ) {
+		$this->language = trim( $v );
+		$this->addParam( 'language', $this->language );
 		return true;
 	}
 	

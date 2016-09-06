@@ -42,6 +42,11 @@ set_time_limit( 0 );
 				Utils::help();
 				break;
 			
+			case '-l':
+				$gsearch->setLanguage( $_SERVER['argv'][$i + 1] );
+				$i++;
+				break;
+			
 			case '-o':
 				$gsearch->setOrganization( $_SERVER['argv'][$i + 1] );
 				$i++;

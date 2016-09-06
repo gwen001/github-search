@@ -11,6 +11,7 @@ Options:
 	-e	file extension filter
 	-f	looking for file
 	-h	print this help
+	-l	language filter
 	-o	provide organization name
 	-r	maximum number of results, default 50
 	-s	search string
