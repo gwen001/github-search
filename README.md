@@ -1,6 +1,6 @@
 # github-search
 PHP tool to perform basic search on GitHub.  
-Cookie session is mandatory if you don't provide organization name (GitHub requirement).
+Cookie session is mandatory if you don't provide organization name (GitHub requirement).  
 Note that the search engine is case insensitive.  
 
 ```
