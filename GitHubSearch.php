@@ -47,8 +47,18 @@ class GitHubSearch
 		$this->max_result = (int)$v;
 		return true;
 	}
-
-
+	
+	
+	public function getExtension() {
+		return $this->extension;
+	}
+	public function setExtension( $v ) {
+		$this->extension = trim( $v );
+		$this->addParam( 'extension', $this->extension );
+		return true;
+	}
+	
+	
 	public function getFilename() {
 		return $this->filename;
 	}
@@ -94,10 +104,10 @@ class GitHubSearch
 			$tmp[] = $k . ':' . $v;
 		}
 		$tmp = array_map( 'urlencode', $tmp );
-		$search_string = implode(self::FS, $tmp);
 		if( strlen($this->string) ) {
-			$search_string .= self::FS . $this->string;
+			$tmp[] = preg_replace('#\s+#',self::FS,$this->string);
 		}
+		$search_string = implode(self::FS, $tmp);
 		return $search_string;
 	}
 	

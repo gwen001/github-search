@@ -28,6 +28,11 @@ set_time_limit( 0 );
 				$i++;
 				break;
 
+			case '-e':
+				$gsearch->setExtension( $_SERVER['argv'][$i + 1] );
+				$i++;
+				break;
+
 			case '-f':
 				$gsearch->setFilename( $_SERVER['argv'][$i + 1] );
 				$i++;
@@ -58,7 +63,7 @@ set_time_limit( 0 );
 	}
 	
 	if( !$gsearch->getString() && !$gsearch->getFilename() ) {
-		Utils::help('Search param not found');
+		Utils::help('Search param not found, provide at least a filename or a string');
 	}
 	if( !$gsearch->getOrganization() && !$gsearch->getCookie() ) {
 		Utils::help('You must provide cookie session to perform queries without organization name');
