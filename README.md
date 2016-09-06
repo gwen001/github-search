@@ -22,3 +22,6 @@ Examples:
 I don't believe in license.  
 You can do want you want with this program.  
 
+
+![GitHub search example]
+(https://raw.githubusercontent.com/gwen001/github-search/master/example.png)
