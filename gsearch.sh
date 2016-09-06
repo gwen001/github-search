@@ -23,7 +23,7 @@ fi
 i=0
 t_dorks="$(cat $dorks|tr ' ' '#')"
 n_result=5
-n_sleep=2
+n_sleep=3
 cnt=0
 
 for d in $t_dorks ; do
