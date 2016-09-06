@@ -239,7 +239,7 @@ class GitHubSearch
 				echo "\t-";
 			} else {
 				for ($i = 0; list($line, $s) = each($r['summary']); $i++) {
-					echo (($i == 0) ? "\t" : "\n\t\t") . $line . '- ' . $s;
+					echo (($i == 0) ? "\t" : "\n\t\t") . '(' . $line . ') ' . $s;
 				}
 			}
 			echo "\nlink:\t\t".($r['link']?self::GITHUB_URL.$r['link']:'-');
