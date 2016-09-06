@@ -1,5 +1,5 @@
 # github-search
-PHP tool to perform basic GitHub search.  
+PHP tool to perform basic search on GitHub.  
 Note that the search engine is case insensitive.  
 
 ```
