@@ -136,13 +136,6 @@ class GitHubSearch
 			$r = curl_exec( $c );
 			curl_close( $c );
 			
-			//$r = file_get_contents( 'test_org_file.html' );
-			//$r = file_get_contents( 'test_org_str.html' );
-			//$r = file_get_contents('test_org_str2.html');
-			//$r = file_get_contents('test_str.html');
-			//var_dump( $r );
-			//exit();
-	
 			$doc = new DomDocument();
 			@$doc->loadHTML($r);
 			
@@ -192,13 +185,14 @@ class GitHubSearch
 				}
 				
 				if( strlen($this->string) ) {
+					// extract code summary
 					$code = $xpath->query('div/table[contains(@class,"highlight")]', $res);
 					if ($code->length) {
 						$t_td = $xpath->query('tr/td', $code[0]);
 						$n_td = $t_td->length; 
 						for( $i=1 ; $i<$n_td ; $i+=2 ) {
 							if( stristr($t_td[$i]->nodeValue,$this->string) ) {
-								$n_line = (int)$t_td[$i-1]->nodeValue;
+								$n_line = (int)$t_td[$i-1]->nodeValue; // line number
 								$tmp['summary'][ $n_line ] = trim( $t_td[$i]->nodeValue );
 							}
 						}
