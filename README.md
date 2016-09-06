@@ -8,6 +8,7 @@ Usage: php github-search.php [OPTIONS]
 
 Options:
 	-c	set cookie session
+	-e	file extension filter
 	-f	looking for file
 	-h	print this help
 	-o	provide organization name
