@@ -3,7 +3,7 @@ PHP tool to perform basic GitHub search.
 Note that the search engine is case insensitive.  
 
 ```
-Usage: php github-search.php [OPTIONS] -f <subdomain|input file>
+Usage: php github-search.php [OPTIONS]
 
 Options:
 	-c	set cookie session
