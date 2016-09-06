@@ -58,10 +58,10 @@ set_time_limit( 0 );
 	}
 	
 	if( !$gsearch->getString() && !$gsearch->getFilename() ) {
-		Utils::help('Search param not found!');
+		Utils::help('Search param not found');
 	}
 	if( !$gsearch->getOrganization() && !$gsearch->getCookie() ) {
-		Utils::help('You must provide cookie session to perform queries without organization name!');
+		Utils::help('You must provide cookie session to perform queries without organization name');
 	}
 }
 // ---
