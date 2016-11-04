@@ -11,28 +11,28 @@ class GitHubSearch
 	const FS = '+';
 	const GITHUB_URL = 'https://github.com';
 	const GITHUB_PAGE_RESULT = 10;
-	
-	private $search_url = '/search?utf8=%E2%9C%93&o=desc&type=Code&s=&q='; 
-	
+
+	private $search_url = '/search?utf8=%E2%9C%93&o=desc&type=Code&s=&q=';
+
 	private $max_result = 50;
-	
+
 	private $search_string = null;
 
 	private $cookie = null;
-	
+
 	private $filename = null;
-	
+
 	private $language = null;
-	
+
 	private $organization = null;
-	
+
 	private $string = null;
-	
+
 	private $search_params = [];
 
 	private $t_result = [];
-	
-	
+
+
 	public function getCookie() {
 		return $this->cookie;
 	}
@@ -40,8 +40,8 @@ class GitHubSearch
 		$this->cookie = trim( $v );
 		return true;
 	}
-	
-	
+
+
 	public function getMaxResult() {
 		return $this->max_result;
 	}
@@ -49,8 +49,8 @@ class GitHubSearch
 		$this->max_result = (int)$v;
 		return true;
 	}
-	
-	
+
+
 	public function getExtension() {
 		return $this->extension;
 	}
@@ -59,8 +59,8 @@ class GitHubSearch
 		$this->addParam( 'extension', $this->extension );
 		return true;
 	}
-	
-	
+
+
 	public function getFilename() {
 		return $this->filename;
 	}
@@ -69,8 +69,8 @@ class GitHubSearch
 		$this->addParam( 'filename', $this->filename );
 		return true;
 	}
-	
-	
+
+
 	public function getLanguage() {
 		return $this->language;
 	}
@@ -79,8 +79,8 @@ class GitHubSearch
 		$this->addParam( 'language', $this->language );
 		return true;
 	}
-	
-	
+
+
 	public function getOrganization() {
 		return $this->organization;
 	}
@@ -89,8 +89,8 @@ class GitHubSearch
 		$this->addParam( 'org', $this->organization );
 		return true;
 	}
-	
-	
+
+
 	public function getString() {
 		return $this->string;
 	}
@@ -107,8 +107,8 @@ class GitHubSearch
 		$this->search_params[$k] = $v;
 		return true;
 	}
-	
-	
+
+
 	public function computeSearch()
 	{
 		$tmp = [];
@@ -122,8 +122,8 @@ class GitHubSearch
 		$search_string = implode(self::FS, $tmp);
 		return $search_string;
 	}
-	
-	
+
+
 	public function getSearch( $full_url=false ) {
 		if( is_null($this->search_string) ) {
 			$this->search_string = $this->computeSearch();
@@ -135,18 +135,18 @@ class GitHubSearch
 		return $url;
 	}
 
-	
+
 	public function run()
 	{
 		$n_result = 0;
 		$max_page = ceil( $this->max_result / self::GITHUB_PAGE_RESULT );
 		$url = $this->getSearch(true);
 		echo "Calling url ".$url."\n";
-		
+
 		for( $p=1,$run=true ; $p<=$max_page && $run ; $p++ )
 		{
 			$url = $this->getSearch(true).'&p='.$p;
-			
+
 			$c = curl_init();
 			curl_setopt( $c, CURLOPT_URL, $this->getSearch(true) );
 			curl_setopt( $c, CURLOPT_FOLLOWLOCATION, true );
@@ -157,17 +157,17 @@ class GitHubSearch
 			}
 			$r = curl_exec( $c );
 			curl_close( $c );
-			
-			$doc = new DomDocument();
-			@$doc->loadHTML($r);
-			
+
+			$doc = new \DomDocument();
+			@$doc->loadHTML( $r );
+
 			// extract results
-			$xpath = new DOMXPath($doc);
-			
+			$xpath = new \DOMXPath( $doc );
+
 			// number of result
 			if( $p == 1 ) {
 				$t_menu = $xpath->query('//nav[contains(@class,"menu")]/a[contains(@href,"type=Code")]/span');
-				if ($t_menu->length) {
+				if( $t_menu->length ) {
 					$n_found = (int)preg_replace( '#[^0-9]#', '', $t_menu[0]->nodeValue );
 					if( $n_found < $this->max_result ) {
 						$this->max_result = $n_found;
@@ -180,11 +180,11 @@ class GitHubSearch
 				}
 				echo "\n";
 			}
-			
+
 			echo "Parsing page ".$p."...\n";
-			
+
 			$t_result = $xpath->query('//div[contains(@class,"code-list-item")]');
-			
+
 			foreach ($t_result as $res)
 			{
 				$tmp = [
@@ -194,24 +194,24 @@ class GitHubSearch
 					'language' => '',
 					'summary' => [],
 				];
-				
+
 				// extract results item title
 				$entries = $xpath->query('p[contains(@class,"title")]/a', $res);
 				$tmp['repository'] = trim( $entries[0]->textContent );
 				$tmp['file'] = trim( $entries[1]->textContent );
 				$tmp['link'] = trim( $entries[1]->getAttribute('href') );
-				
+
 				$entries = $xpath->query('span[contains(@class,"language")]', $res);
 				if( $entries->length ) {
 					$tmp['language'] = trim($entries[0]->textContent);
 				}
-				
+
 				if( strlen($this->string) ) {
 					// extract code summary
 					$code = $xpath->query('div/table[contains(@class,"highlight")]', $res);
 					if ($code->length) {
 						$t_td = $xpath->query('tr/td', $code[0]);
-						$n_td = $t_td->length; 
+						$n_td = $t_td->length;
 						for( $i=1 ; $i<$n_td ; $i+=2 ) {
 							if( stristr($t_td[$i]->nodeValue,$this->string) ) {
 								$n_line = (int)$t_td[$i-1]->nodeValue; // line number
@@ -220,7 +220,7 @@ class GitHubSearch
 						}
 					}
 				}
-				
+
 				$this->t_result[] = $tmp;
 
 				$n_result++;
@@ -231,12 +231,12 @@ class GitHubSearch
 				}
 			}
 		}
-		
+
 		echo "\n";
-		
+
 		return count($this->t_result);
 	}
-	
+
 
 	public function printResult()
 	{
