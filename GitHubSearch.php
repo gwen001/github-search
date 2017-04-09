@@ -156,6 +156,8 @@ class GitHubSearch
 				curl_setopt( $c, CURLOPT_COOKIE, $this->cookie );
 			}
 			$r = curl_exec( $c );
+			//$r = file_get_contents( 'result.html' );
+			//var_dump( $r );
 			curl_close( $c );
 
 			$doc = new \DomDocument();
@@ -166,7 +168,8 @@ class GitHubSearch
 
 			// number of result
 			if( $p == 1 ) {
-				$t_menu = $xpath->query('//nav[contains(@class,"menu")]/a[contains(@href,"type=Code")]/span');
+				$t_menu = $xpath->query('//nav[contains(@role,"navigation")]/a[contains(@href,"type=Code")]/span');
+				//var_dump( $t_menu );
 				if( $t_menu->length ) {
 					$n_found = (int)preg_replace( '#[^0-9]#', '', $t_menu[0]->nodeValue );
 					if( $n_found < $this->max_result ) {
@@ -196,7 +199,9 @@ class GitHubSearch
 				];
 
 				// extract results item title
-				$entries = $xpath->query('p[contains(@class,"title")]/a', $res);
+				//$entries = $xpath->query('p[contains(@class,"title")]/a', $res);
+				$entries = $xpath->query('div[contains(@class,"d-inline-block col-10")]/a', $res);
+				//var_dump($entries);
 				$tmp['repository'] = trim( $entries[0]->textContent );
 				$tmp['file'] = trim( $entries[1]->textContent );
 				$tmp['link'] = trim( $entries[1]->getAttribute('href') );
