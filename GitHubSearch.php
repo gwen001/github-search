@@ -11,6 +11,7 @@ class GitHubSearch
 	const FS = '+';
 	const GITHUB_URL = 'https://github.com';
 	const GITHUB_PAGE_RESULT = 10;
+	const USER_AGENT = 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:52.0) Gecko/20100101 Firefox/52.0';
 
 	private $search_url = '/search?utf8=%E2%9C%93&o=desc&type=Code&s=&q=';
 
@@ -150,6 +151,7 @@ class GitHubSearch
 			$c = curl_init();
 			curl_setopt( $c, CURLOPT_URL, $this->getSearch(true) );
 			curl_setopt( $c, CURLOPT_FOLLOWLOCATION, true );
+			curl_setopt( $c, CURLOPT_USERAGENT, self::USER_AGENT );
 			curl_setopt( $c, CURLOPT_HEADER, true );
 			curl_setopt( $c, CURLOPT_RETURNTRANSFER, true );
 			if( $this->cookie ) {
@@ -162,8 +164,10 @@ class GitHubSearch
 			curl_close( $c );
 
 			if( stristr($r,'abuse detection mechanism') ) {
+				echo "\n";
 				Utils::_println( 'Abuse detection mechanism spotted, breaking...', 'red' );
-				break;
+				echo "\n";
+				return count($this->t_result);
 			}
 			
 			$doc = new \DomDocument();
@@ -245,6 +249,8 @@ class GitHubSearch
 					break;
 				}
 			}
+			
+			usleep( 1500000 ); // 1.5 seconde
 		}
 
 		echo "\n";
