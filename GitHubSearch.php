@@ -156,7 +156,8 @@ class GitHubSearch
 				curl_setopt( $c, CURLOPT_COOKIE, $this->cookie );
 			}
 			$r = curl_exec( $c );
-			//$r = file_get_contents( 'result.html' );
+			//file_put_contents( 'result_'.$p.'.html', $r );
+			//$r = file_get_contents( 'result_'.$p.'.html' );
 			//var_dump( $r );
 			curl_close( $c );
 
@@ -169,7 +170,7 @@ class GitHubSearch
 			// number of result
 			if( $p == 1 ) {
 				$t_menu = $xpath->query('//nav[contains(@role,"navigation")]/a[contains(@href,"type=Code")]/span');
-				//var_dump( $t_menu );
+				var_dump( $t_menu );
 				if( $t_menu->length ) {
 					$n_found = (int)preg_replace( '#[^0-9]#', '', $t_menu[0]->nodeValue );
 					if( $n_found < $this->max_result ) {
@@ -182,11 +183,14 @@ class GitHubSearch
 					exit();
 				}
 				echo "\n";
+				
+				//break; // why sould we skip page 1 ??
 			}
 
 			echo "Parsing page ".$p."...\n";
 
 			$t_result = $xpath->query('//div[contains(@class,"code-list-item")]');
+			//var_dump($t_result->length);
 
 			foreach ($t_result as $res)
 			{
