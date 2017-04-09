@@ -65,6 +65,11 @@ class Utils
 	{
 		echo "\033[".self::T_SHELL_COLORS[$color]."m".$str."\033[0m";
 	}
+	public static function _println( $str, $color )
+	{
+		self::_print( $str, $color );
+		echo "\n";
+	}
 
 
 	public static function _array_search( $array, $search, $ignore_case=true )
