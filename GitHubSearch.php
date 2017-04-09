@@ -155,9 +155,9 @@ class GitHubSearch
 			if( $this->cookie ) {
 				curl_setopt( $c, CURLOPT_COOKIE, $this->cookie );
 			}
-			//$r = curl_exec( $c );
+			$r = curl_exec( $c );
 			//file_put_contents( 'result_'.$p.'.html', $r );
-			$r = file_get_contents( 'result_'.$p.'.html' );
+			//$r = file_get_contents( 'result_'.$p.'.html' );
 			//var_dump( $r );
 			curl_close( $c );
 
@@ -176,7 +176,7 @@ class GitHubSearch
 			if( $p == 1 ) {
 				//$t_menu = $xpath->query('//nav[contains(@class,"menu")]/a[contains(@href,"type=Code")]/span');
 				$t_menu = $xpath->query('//nav[contains(@role,"navigation")]/a[contains(@href,"type=Code")]/span'); // maj 09/04/2017
-				var_dump( $t_menu );
+				//var_dump( $t_menu );
 				if( $t_menu->length ) {
 					$n_found = (int)preg_replace( '#[^0-9]#', '', $t_menu[0]->nodeValue );
 					if( $n_found < $this->max_result ) {
@@ -284,7 +284,7 @@ class GitHubSearch
 		//var_dump( $matches );
 		//var_dump( $str );
 		
-		Utils::_print( '('.$line.') ', 'green' );
+		Utils::_print( '('.$line.') ', 'yellow' );
 
 		if( $m ) {
 			$n = count( $matches[0] );
@@ -304,5 +304,3 @@ class GitHubSearch
 		Utils::_print( $s3, 'green' );
 	}
 }
-
-?>
