@@ -13,8 +13,9 @@ Options:
 	-h	print this help
 	-l	language filter
 	-o	provide organization name
-	-r	maximum number of results, default 50
+	-r	maximum number of results, default 100
 	-s	search string
+	-t	set authorization token (overwrite cookie)
 
 Examples:
 	php github-search.php -o myorganization -s db_password

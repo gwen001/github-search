@@ -10,16 +10,21 @@ class GitHubSearch
 {
 	const FS = '+';
 	const GITHUB_URL = 'https://github.com';
+	const GITHUB_API_URL = 'https://api.github.com';
 	const GITHUB_PAGE_RESULT = 10;
+	const GITHUB_API_PAGE_RESULT = 100;
 	const USER_AGENT = 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:52.0) Gecko/20100101 Firefox/52.0';
 
 	private $search_url = '/search?utf8=%E2%9C%93&o=desc&type=Code&s=&q=';
+	private $search_api_url = '/search/code?q=';
 
-	private $max_result = 50;
+	private $max_result = 100;
 
 	private $search_string = null;
 
 	private $cookie = null;
+	
+	private $auth_token = null;
 
 	private $filename = null;
 
@@ -87,7 +92,16 @@ class GitHubSearch
 	}
 	public function setOrganization( $v ) {
 		$this->organization = trim( $v );
-		$this->addParam( 'org', $this->organization );
+		$this->addParam( 'user', $this->organization );
+		return true;
+	}
+
+
+	public function getAuthToken() {
+		return $this->auth_token;
+	}
+	public function setAuthToken( $v ) {
+		$this->auth_token = trim( $v );
 		return true;
 	}
 
@@ -137,32 +151,51 @@ class GitHubSearch
 	}
 
 
+	public function getSearchApi( $full_url=false ) {
+		if( is_null($this->search_string) ) {
+			$this->search_string = $this->computeSearch();
+		}
+		$url = $this->search_string;
+		if( $full_url ) {
+			$url = self::GITHUB_API_URL.$this->search_api_url.$url;
+		}
+		return $url;
+	}
+
+
 	public function run()
 	{
 		$n_result = 0;
 		$max_page = ceil( $this->max_result / self::GITHUB_PAGE_RESULT );
-		$url = $this->getSearch(true);
-		echo "Calling url ".$url."\n";
+		$url = $this->getSearch( true );
+		echo "Calling url ".$url." using regular search\n";
 
 		for( $p=1,$run=true ; $p<=$max_page && $run ; $p++ )
 		{
 			$url = $this->getSearch(true).'&p='.$p;
 
 			$c = curl_init();
-			curl_setopt( $c, CURLOPT_URL, $this->getSearch(true) );
+			curl_setopt( $c, CURLOPT_URL, $url );
 			curl_setopt( $c, CURLOPT_FOLLOWLOCATION, true );
-			curl_setopt( $c, CURLOPT_USERAGENT, self::USER_AGENT );
 			curl_setopt( $c, CURLOPT_HEADER, true );
 			curl_setopt( $c, CURLOPT_RETURNTRANSFER, true );
 			if( $this->cookie ) {
 				curl_setopt( $c, CURLOPT_COOKIE, $this->cookie );
 			}
+			curl_setopt( $c, CURLOPT_USERAGENT, self::USER_AGENT );
 			$r = curl_exec( $c );
 			//file_put_contents( 'result_'.$p.'.html', $r );
 			//$r = file_get_contents( 'result_'.$p.'.html' );
 			//var_dump( $r );
 			curl_close( $c );
 
+			if( stristr($r,'looks like something went wrong') ) {
+				echo "\n";
+				Utils::_println( 'Looks like something went wrong, breaking...', 'red' );
+				echo "\n";
+				return count($this->t_result);
+			}
+			
 			if( stristr($r,'abuse detection mechanism') ) {
 				echo "\n";
 				Utils::_println( 'Abuse detection mechanism spotted, breaking...', 'red' );
@@ -185,16 +218,13 @@ class GitHubSearch
 					$n_found = (int)preg_replace( '#[^0-9]#', '', $t_menu[0]->nodeValue );
 					if( $n_found < $this->max_result ) {
 						$this->max_result = $n_found;
+						$max_page = ceil( $n_found / self::GITHUB_PAGE_RESULT );
 					}
-					echo $n_found . " result(s) found, displaying ".$this->max_result.".\n";
-					$max_page = ceil( $n_found / self::GITHUB_PAGE_RESULT );
+					echo $n_found . " result(s) found, displaying ".$this->max_result.".\n\n";
 				} else {
 					echo "Nothing found.\n";
 					exit();
 				}
-				echo "\n";
-				
-				//break; // why sould we skip page 1 ??
 			}
 
 			echo "Parsing page ".$p."...\n";
@@ -202,7 +232,7 @@ class GitHubSearch
 			$t_result = $xpath->query('//div[contains(@class,"code-list-item")]');
 			//var_dump($t_result->length);
 
-			foreach ($t_result as $res)
+			foreach( $t_result as $res )
 			{
 				$tmp = [
 					'repository' => '',
@@ -212,18 +242,17 @@ class GitHubSearch
 					'summary' => [],
 				];
 
-				// extract results item title
-				//$entries = $xpath->query('p[contains(@class,"title")]/a', $res);
-				$entries = $xpath->query('div[contains(@class,"d-inline-block col-10")]/a', $res); // maj 09/04/2017
-				//var_dump($entries);
-				$tmp['repository'] = trim( $entries[0]->textContent );
-				$tmp['file'] = trim( $entries[1]->textContent );
-				$tmp['link'] = trim( $entries[1]->getAttribute('href') );
-
-				$entries = $xpath->query('span[contains(@class,"language")]', $res);
-				if( $entries->length ) {
-					$tmp['language'] = trim($entries[0]->textContent);
+				$language = $xpath->query('span[contains(@class,"float-right f6 text-gray")]', $res);
+				//var_dump( $language->length );
+				if( $language->length ) {
+					$tmp['language'] = trim($language[0]->textContent);
 				}
+
+				$details = $xpath->query('div[contains(@class,"d-inline-block col-10")]/a', $res); // maj 09/04/2017
+				
+				$tmp['repository'] = trim( $details[0]->textContent );
+				$tmp['file'] = trim( $details[1]->textContent );
+				$tmp['link'] = trim( $details[1]->getAttribute('href') );
 
 				if( strlen($this->string) ) {
 					// extract code summary
@@ -250,9 +279,113 @@ class GitHubSearch
 				}
 			}
 			
-			usleep( 1500000 ); // 1.5 seconde
+			//usleep( 1500000 ); // 1.5 seconde
 		}
 
+		echo "\n";
+
+		return count($this->t_result);
+	}
+
+
+	public function runApi()
+	{
+		$t_headers = [
+			'User-agent: '.self::USER_AGENT,
+			'Accept: application/vnd.github.v3.text-match+json',
+		];
+		if( $this->auth_token ) {
+			$t_headers[] = 'Authorization: token '.$this->auth_token;
+		}
+		//var_dump( $t_headers );
+		
+		$n_result = 0;
+		$max_page = ceil( $this->max_result / self::GITHUB_API_PAGE_RESULT );
+		//var_dump($max_page);
+		$url = $this->getSearchApi( true );
+		echo "Calling url ".$url." using API search\n";
+
+		for( $p=1,$run=true ; $p<=$max_page && $run ; $p++ )
+		{
+			$url = $this->getSearchApi(true).'&page='.$p;
+			//var_dump( $url );
+
+			$c = curl_init();
+			curl_setopt( $c, CURLOPT_URL, $url );
+			curl_setopt( $c, CURLOPT_FOLLOWLOCATION, true );
+			//curl_setopt( $c, CURLOPT_HEADER, true );
+			curl_setopt( $c, CURLOPT_RETURNTRANSFER, true );
+			curl_setopt( $c, CURLOPT_HTTPHEADER, $t_headers );
+			$r = curl_exec( $c );
+			//file_put_contents( 'result_'.$p.'.html', $r );
+			//$r = file_get_contents( 'result_'.$p.'.html' );
+			//var_dump( $r );
+			curl_close( $c );
+			
+			$t_json = json_decode( $r );
+			//file_put_contents( 'result_'.$p.'_json.html', print_r($t_json,true) );
+			//var_dump( $t_json );
+			//var_dump( count($t_json) );
+			
+			if( stristr($r,'looks like something went wrong') ) {
+				echo "\n";
+				Utils::_println( 'Looks like something went wrong, breaking...', 'red' );
+				echo "\n";
+				return count($this->t_result);
+			}
+			
+			if( stristr($r,'abuse detection mechanism') ) {
+				echo "\n";
+				Utils::_println( 'Abuse detection mechanism spotted, breaking...', 'red' );
+				echo "\n";
+				return count($this->t_result);
+			}
+			
+			// number of result
+			if( $p == 1 ) {
+				$n_found = $t_json->total_count;
+				if( $n_found ) {
+					if( $n_found < $this->max_result ) {
+						$this->max_result = $n_found;
+						//$max_page = ceil( $n_found / self::GITHUB_API_PAGE_RESULT );
+					}
+					echo $n_found . " result(s) found, displaying ".$this->max_result.".\n\n";
+				}
+				else {
+					echo "Nothing found.\n";
+					exit();
+				}
+			}
+
+			echo "Parsing page ".$p."...\n";
+
+			foreach( $t_json->items as $item )
+			{
+				$tmp = [
+					'repository' => '',
+					'file' => '',
+					'link' => '',
+					'language' => '',
+					'summary' => [],
+				];
+				
+				$tmp['repository'] = $item->repository->full_name;
+				$tmp['file'] = $item->path;
+				$tmp['link'] = $item->html_url;
+				
+				$l = 0;
+				$t_fragment = explode( "\n", $item->text_matches[0]->fragment );
+				foreach( $t_fragment as $f ) {
+					$f = trim( $f );
+					if( stristr($f,$this->string) ) {
+						$tmp['summary'][--$l] = $f;
+					}
+				}
+				
+				$this->t_result[] = $tmp;
+			}
+		}
+		
 		echo "\n";
 
 		return count($this->t_result);
@@ -290,7 +423,7 @@ class GitHubSearch
 		//var_dump( $matches );
 		//var_dump( $str );
 		
-		Utils::_print( '('.$line.') ', 'yellow' );
+		Utils::_print( '('.($line>=0?$line:'-').') ', 'yellow' );
 
 		if( $m ) {
 			$n = count( $matches[0] );

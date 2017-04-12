@@ -62,6 +62,11 @@ set_time_limit( 0 );
 				$i++;
 				break;
 
+			case '-t':
+				$gsearch->setAuthToken( $_SERVER['argv'][$i + 1] );
+				$i++;
+				break;
+
 			default:
 				Utils::help('Unknown option: '.$_SERVER['argv'][$i]);
 		}
@@ -79,8 +84,12 @@ set_time_limit( 0 );
 
 // main loop
 {
-	$cnt_result = $gsearch->run();
-
+	if( $gsearch->getAuthToken() ) {
+		$cnt_result = $gsearch->runApi();
+	} else {
+		$cnt_result = $gsearch->run();
+	}
+	
 	if( $cnt_result ) {
 		$gsearch->printResult();
 	}
