@@ -347,7 +347,7 @@ class GitHubSearch
 				if( $n_found ) {
 					if( $n_found < $this->max_result ) {
 						$this->max_result = $n_found;
-						//$max_page = ceil( $n_found / self::GITHUB_API_PAGE_RESULT );
+						$max_page = ceil( $n_found / self::GITHUB_API_PAGE_RESULT );
 					}
 					echo $n_found . " result(s) found, displaying ".$this->max_result.".\n\n";
 				}
