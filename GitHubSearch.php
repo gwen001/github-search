@@ -12,7 +12,7 @@ class GitHubSearch
 	const GITHUB_URL = 'https://github.com';
 	const GITHUB_API_URL = 'https://api.github.com';
 	const GITHUB_PAGE_RESULT = 10;
-	const GITHUB_API_PAGE_RESULT = 100;
+	const GITHUB_API_PAGE_RESULT = 50;
 	const USER_AGENT = 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:52.0) Gecko/20100101 Firefox/52.0';
 
 	private $search_url = '/search?utf8=%E2%9C%93&o=desc&type=Code&s=&q=';
