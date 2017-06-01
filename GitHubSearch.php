@@ -34,6 +34,8 @@ class GitHubSearch
 
 	private $string = null;
 
+	private $color_output = true;
+
 	private $search_params = [];
 
 	private $t_result = [];
@@ -44,6 +46,15 @@ class GitHubSearch
 	}
 	public function setCookie( $v ) {
 		$this->cookie = trim( $v );
+		return true;
+	}
+
+
+	public function getColorOutput() {
+		return $this->color_output;
+	}
+	public function setColorOutput( $v ) {
+		$this->color_output = (bool)$v;
 		return true;
 	}
 
@@ -252,7 +263,7 @@ class GitHubSearch
 				
 				$tmp['repository'] = trim( $details[0]->textContent );
 				$tmp['file'] = trim( $details[1]->textContent );
-				$tmp['link'] = trim( $details[1]->getAttribute('href') );
+				$tmp['link'] = self::GITHUB_URL.trim( $details[1]->getAttribute('href') );
 
 				if( strlen($this->string) ) {
 					// extract code summary
@@ -343,7 +354,7 @@ class GitHubSearch
 			
 			// number of result
 			if( $p == 1 ) {
-				$n_found = $t_json->total_count;
+				$n_found = isset($t_json->total_count) ? $t_json->total_count : 0;
 				if( $n_found ) {
 					if( $n_found < $this->max_result ) {
 						$this->max_result = $n_found;
@@ -396,7 +407,11 @@ class GitHubSearch
 	{
 		foreach( $this->t_result as $k=>$r )
 		{
-			echo "#".($k+1);
+			if( !$this->color_output ) {
+				echo "#".($k+1);
+			} else {
+				Utils::_print( "#".($k+1), 'light_cyan' );
+			}
 			echo "\nrepository:\t".($r['repository']?$r['repository']:'-');
 			echo "\nfile:\t\t".($r['file']?$r['file']:'-');
 			echo "\nlanguage:\t".($r['language']?$r['language']:'-');
@@ -409,7 +424,7 @@ class GitHubSearch
 					$this->printStringResult( $line, $s );
 				}
 			}
-			echo "\nlink:\t\t".($r['link']?self::GITHUB_URL.$r['link']:'-');
+			echo "\nlink:\t\t".($r['link']?$r['link']:'-');
 			echo "\n\n";
 		}
 	}
@@ -417,6 +432,11 @@ class GitHubSearch
 	
 	private function printStringResult( $line, $str )
 	{
+		if( !$this->color_output ) {
+			echo '('.($line>=0?$line:'-').') '.$str;
+			return;
+		}
+
 		$p = 0;
 		$l = strlen( $this->string );
 		$m = preg_match_all( '#'.$this->string.'#i', $str, $matches, PREG_OFFSET_CAPTURE );
@@ -424,7 +444,7 @@ class GitHubSearch
 		//var_dump( $str );
 		
 		Utils::_print( '('.($line>=0?$line:'-').') ', 'yellow' );
-
+		
 		if( $m ) {
 			$n = count( $matches[0] );
 			//var_dump($n);

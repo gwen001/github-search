@@ -47,6 +47,10 @@ set_time_limit( 0 );
 				$i++;
 				break;
 			
+			case '-n':
+				$gsearch->setColorOutput( false );
+				break;
+			
 			case '-o':
 				$gsearch->setOrganization( $_SERVER['argv'][$i + 1] );
 				$i++;

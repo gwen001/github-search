@@ -2,7 +2,7 @@
 
 
 function usage {
-    echo "Usage: "$0" <organization> <dorks file>"
+    echo "Usage: "$0" <organization> <dorks file> <token>"
     if [ -n "$1" ] ; then
 		echo "Error: "$1"!"
     fi
@@ -15,6 +15,7 @@ fi
 
 org=$1
 dorks=$2
+token=$3
 
 if [ ! -f $dorks ] ; then
     usage "dorks file not found"
@@ -27,7 +28,7 @@ n_sleep=3
 cnt=0
 
 for d in $t_dorks ; do
-	option="-r $n_result -o $org $(echo $d|tr '#' ' ')"
+	option="-t $token -r $n_result -o $org $(echo $d|tr '#' ' ')"
 	s=$(php github-search.php $option)
 	found=`echo $s | egrep -i "result\(s\) found"`
 	if [ -n "$found" ] ; then
