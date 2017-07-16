@@ -25,9 +25,9 @@ Examples:
 	php github-search.php -t 32a11e6f340c2fe1a6071795a3b1a8c876b3cf29 -l php -s DB_USERNAME
 ```
 
+<img src="https://raw.githubusercontent.com/gwen001/github-search/master/example.png" alt="GitHub search example">
+<br><br>
+
 I don't believe in license.  
 You can do want you want with this program.  
 
-
-![GitHub search example]
-(https://raw.githubusercontent.com/gwen001/github-search/master/example.png)
