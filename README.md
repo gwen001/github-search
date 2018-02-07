@@ -7,17 +7,26 @@ Note that the search engine is case insensitive.
 Usage: php github-search.php [OPTIONS]
 
 Options:
-	--domain	set domain
-	-h, --help	print this help
-	--ip		set server ip address
-	--port		set port
-	--ssl		force ssl
-	--threads	set maximum threads, default 1
-	--wordlist	set plain text file that contains subdomains to test
+	-c	set cookie session
+	-e	file extension filter
+	-f	looking for file
+	-h	print this help
+	-l	language filter
+	-n	no color
+	-o	provide organization name
+	-r	maximum number of results, default 100
+	-s	search string
+	-t	set authorization token (overwrite cookie)
 
 Examples:
-	php vhost-discover.php --domain=example.com --wordlist=sub.txt --threads=5
+	php github-search.php -o myorganization -s db_password
+	php github-search.php -o myorganization -f wp-config.php -s db_password
+	php github-search.php -c "user_session=B0KqycP8LlYORc-s3WFZoH71TG" -f wp-config -e php -r 1000
+	php github-search.php -t 32a11e6f340c2fe1a6071795a3b1a8c876b3cf29 -l php -s DB_USERNAME
 ```
+
+<img src="https://raw.githubusercontent.com/gwen001/github-search/master/example.png" alt="GitHub search example">
+<br><br>
 
 I don't believe in license.  
 You can do want you want with this program.  

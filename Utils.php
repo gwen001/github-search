@@ -60,25 +60,18 @@ class Utils
 		return filter_var( $str, FILTER_VALIDATE_EMAIL );
 	}
 
-	
-	public static function _print( $str, $color, $echo=true )
+
+	public static function _print( $str, $color )
 	{
-		$str = "\033[".self::T_SHELL_COLORS[$color]."m".$str." \033[0m";
-		if( $echo ) {
-			echo $str;
-		}
-		return $str;		
+		echo "\033[".self::T_SHELL_COLORS[$color]."m".$str."\033[0m";
 	}
-	public static function _println( $str, $color, $echo=true )
+	public static function _println( $str, $color )
 	{
-		$str = self::_print( $str, $color, $echo )."\n";
-		if( $echo ) {
-			echo "\n";
-		}
-		return $str;
+		self::_print( $str, $color );
+		echo "\n";
 	}
 
-	
+
 	public static function _array_search( $array, $search, $ignore_case=true )
 	{
 		if( $ignore_case ) {
