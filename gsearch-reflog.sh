@@ -38,28 +38,28 @@ http=${repo:0:4}
 repo_name=$(basename $repo)
 
 if [ $http == "http" ] ; then
-	if [ -d $repo_name ] ; then
-		cd $repo_name
-		git pull
-		cd ..
-	else
+	if [ ! -d $repo_name ] ; then
+		echo "Repository not found, cloning..."
 		git clone $repo
 	fi
 	repo=$repo_name
 fi
 
 if [ -d $repo ] ; then
+	echo "Repository already exists, updating..."
 	cd $repo
-	echo $(pwd)
 	git pull
 	cd ..
 else
-	echo "Directory not found!"
+	echo "Something goes wrong!"
 	exit
 fi
 
 cd $repo
+echo "Running reflog..."
+git log --reflog > reflog.txt
+echo 
 
 for w in  ${t_keywords[@]} ; do
-	git log --reflog --pretty="format:- (%H) %b" | grep --color "$w"
+	grep -n --color "$w" reflog.txt -A 5 -B 5
 done

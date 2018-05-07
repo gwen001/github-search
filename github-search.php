@@ -17,70 +17,77 @@ set_time_limit( 0 );
 
 // parse command line
 {
+	$options = '';
+	$options .= 'c:';
+	$options .= 'e:';
+	$options .= 'f:';
+	$options .= 'h';
+	$options .= 'l:';
+	$options .= 'n';
+	$options .= 'o:';
+	$options .= 'r:';
+	$options .= 's:';
+	$options .= 't:';
+
+	$t_options = getopt( $options );
+	//var_dump( $t_options );
+
 	$gsearch = new GitHubSearch();
 
-	$argc = $_SERVER['argc'] - 1;
-
-	for ($i = 1; $i <= $argc; $i++) {
-		switch ($_SERVER['argv'][$i]) {
-			case '-c':
-				$gsearch->setCookie( $_SERVER['argv'][$i + 1] );
-				$i++;
+	foreach( $t_options as $k=>$v )
+	{
+		switch( $k )
+		{
+			case 'c':
+				$gsearch->setCookie( $v );
 				break;
 
-			case '-e':
-				$gsearch->setExtension( $_SERVER['argv'][$i + 1] );
-				$i++;
+			case 'e':
+				$gsearch->setExtension( $v );
 				break;
 
-			case '-f':
-				$gsearch->setFilename( $_SERVER['argv'][$i + 1] );
-				$i++;
+			case 'f':
+				$gsearch->setFilename( $v );
 				break;
 			
-			case '-h':
+			case 'h':
 				Utils::help();
 				break;
 			
-			case '-l':
-				$gsearch->setLanguage( $_SERVER['argv'][$i + 1] );
-				$i++;
+			case 'l':
+				$gsearch->setLanguage( $v );
 				break;
 			
-			case '-n':
+			case 'n':
 				$gsearch->setColorOutput( false );
 				break;
 			
-			case '-o':
-				$gsearch->setOrganization( $_SERVER['argv'][$i + 1] );
-				$i++;
+			case 'o':
+				$gsearch->setOrganization( $v );
 				break;
 			
-			case '-r':
-				$gsearch->setMaxResult( $_SERVER['argv'][$i + 1] );
-				$i++;
+			case 'r':
+				$gsearch->setMaxResult( $v );
 				break;
 
-			case '-s':
-				$gsearch->setString( $_SERVER['argv'][$i + 1] );
-				$i++;
+			case 's':
+				$gsearch->setString( $v );
 				break;
 
-			case '-t':
-				$gsearch->setAuthToken( $_SERVER['argv'][$i + 1] );
-				$i++;
+			case 't':
+				$gsearch->setAuthToken( $v );
 				break;
 
 			default:
-				Utils::help('Unknown option: '.$_SERVER['argv'][$i]);
+				Utils::help( 'Unknown option: '.$k );
 		}
 	}
 	
 	if( !$gsearch->getString() && !$gsearch->getFilename() ) {
-		Utils::help('Search param not found, provide at least a filename or a string');
+		Utils::help( 'Search param not found, provide at least a filename or a string' );
 	}
-	if( !$gsearch->getOrganization() && !$gsearch->getCookie() ) {
-		Utils::help('You must provide cookie session to perform queries without organization name');
+	if( !$gsearch->getOrganization() && !$gsearch->getCookie() && !$gsearch->getAuthToken() ) {
+		Utils::help( 'You must provide cookie session to perform queries without organization name' );
 	}
 }
 // ---
