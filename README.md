@@ -16,7 +16,7 @@ Options:
 	-o	provide organization name
 	-r	maximum number of results, default 100
 	-s	search string
-	-t	set authorization token (overwrite cookie)
+	-t	set authorization token (overwrite cookie, best option)
 
 Examples:
 	php github-search.php -o myorganization -s db_password
