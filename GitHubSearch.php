@@ -16,8 +16,10 @@ class GitHubSearch
 	const USER_AGENT = 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:52.0) Gecko/20100101 Firefox/52.0';
 
 	private $search_url = '/search?utf8=%E2%9C%93&o=desc&type=Code&s=&q=';
-	private $search_api_url = '/search/code?q=';
-
+	private $search_api_url = '/search/code';
+    private $search_api_parameters = '?sort=updated&order=desc&q=';
+    private $search_api_repos = '/repos';
+    
 	private $max_result = 100;
 
 	private $search_string = null;
@@ -26,11 +28,15 @@ class GitHubSearch
 	
 	private $auth_token = null;
 
+	private $search_commit = false;
+
 	private $filename = null;
 
 	private $language = null;
 
 	private $organization = null;
+
+	private $repository = null;
 
 	private $string = null;
 
@@ -97,6 +103,16 @@ class GitHubSearch
 		return true;
 	}
 
+    
+	public function getSearchCommit() {
+		return $this->search_commit;
+	}
+	public function searchCommit( $v ) {
+		$this->search_commit = (bool)$v;
+        $this->addParam( 'since', '1970-01-01T00:00:00Z' );
+		return true;
+	}
+
 
 	public function getOrganization() {
 		return $this->organization;
@@ -108,11 +124,20 @@ class GitHubSearch
 	}
 
 
+	public function getRepository() {
+		return $this->repository;
+	}
+	public function setRepository( $v ) {
+		$this->repository = trim( $v );
+		return true;
+	}
+
+
 	public function getAuthToken() {
 		return $this->auth_token;
 	}
 	public function setAuthToken( $v ) {
-		$this->auth_token = trim( $v );
+        $this->auth_token = explode( ',', trim($v) );
 		return true;
 	}
 
@@ -168,7 +193,7 @@ class GitHubSearch
 		}
 		$url = $this->search_string;
 		if( $full_url ) {
-			$url = self::GITHUB_API_URL.$this->search_api_url.$url;
+            $url = self::GITHUB_API_URL.$this->search_api_url.$this->search_api_parameters.$url;
 		}
 		return $url;
 	}
@@ -290,7 +315,7 @@ class GitHubSearch
 				}
 			}
 			
-			//usleep( 1500000 ); // 1.5 seconde
+			usleep( 100000 ); // 1 seconde
 		}
 
 		echo "\n";
@@ -304,9 +329,13 @@ class GitHubSearch
 		$t_headers = [
 			'User-agent: '.self::USER_AGENT,
 			'Accept: application/vnd.github.v3.text-match+json',
+            //'Accept: Accept: application/vnd.github.cloak-preview',
 		];
 		if( $this->auth_token ) {
-			$t_headers[] = 'Authorization: token '.$this->auth_token;
+            $i_token = 0;
+            $n_token = count( $this->auth_token ) - 1;
+            $i_header = count( $t_headers );
+			$t_headers[] = 'Authorization: token '.$this->auth_token[$i_token];
 		}
 		//var_dump( $t_headers );
 		
@@ -315,9 +344,12 @@ class GitHubSearch
 		//var_dump($max_page);
 		$url = $this->getSearchApi( true );
 		echo "Calling url ".$url." using API search\n";
+        //echo $max_page;
 
 		for( $p=1,$run=true ; $p<=$max_page && $run ; $p++ )
 		{
+            usleep( 10000 );
+            
 			$url = $this->getSearchApi(true).'&page='.$p;
 			//var_dump( $url );
 
@@ -330,26 +362,36 @@ class GitHubSearch
 			$r = curl_exec( $c );
 			//file_put_contents( 'result_'.$p.'.html', $r );
 			//$r = file_get_contents( 'result_'.$p.'.html' );
-			//var_dump( $r );
 			curl_close( $c );
-			
+			//echo strlen($r)."\n";
+            //var_dump($r);
+            
 			$t_json = json_decode( $r );
 			//file_put_contents( 'result_'.$p.'_json.html', print_r($t_json,true) );
 			//var_dump( $t_json );
 			//var_dump( count($t_json) );
 			
-			if( stristr($r,'looks like something went wrong') ) {
+			if( stristr($r,'looks like something went wrong') !=false  || stristr($r,'Only the first 1000 search') !==false ) {
 				echo "\n";
 				Utils::_println( 'Looks like something went wrong, breaking...', 'red' );
 				echo "\n";
 				return count($this->t_result);
 			}
 			
-			if( stristr($r,'abuse detection mechanism') ) {
-				echo "\n";
-				Utils::_println( 'Abuse detection mechanism spotted, breaking...', 'red' );
-				echo "\n";
-				return count($this->t_result);
+			if( stristr($r,'abuse detection mechanism') !==false || stristr($r,'API rate limit exceeded') !==false ) {
+                echo "\n";
+                Utils::_println( 'Abuse detection mechanism spotted, breaking...', 'red' );
+                if( $this->auth_token && $i_token<$n_token ) {
+                    Utils::_println( 'Using new token...', 'red' );
+                    echo "\n";
+                    $i_token++;
+                    $t_headers[$i_header] = 'Authorization: token '.$this->auth_token[$i_token];
+                    $p--;
+                    continue;
+                } else {
+                    echo "\n";
+                    return count($this->t_result);
+                }
 			}
 			
 			// number of result
@@ -370,31 +412,34 @@ class GitHubSearch
 
 			echo "Parsing page ".$p."...\n";
 
-			foreach( $t_json->items as $item )
-			{
-				$tmp = [
-					'repository' => '',
-					'file' => '',
-					'link' => '',
-					'language' => '',
-					'summary' => [],
-				];
-				
-				$tmp['repository'] = $item->repository->full_name;
-				$tmp['file'] = $item->path;
-				$tmp['link'] = $item->html_url;
-				
-				$l = 0;
-				$t_fragment = explode( "\n", $item->text_matches[0]->fragment );
-				foreach( $t_fragment as $f ) {
-					$f = trim( $f );
-					if( stristr($f,$this->string) ) {
-						$tmp['summary'][--$l] = $f;
-					}
-				}
-				
-				$this->t_result[] = $tmp;
-			}
+            if( isset($t_json->items) )
+            {
+                foreach( $t_json->items as $item )
+                {
+                    $tmp = [
+                        'repository' => '',
+                        'file' => '',
+                        'link' => '',
+                        'language' => '',
+                        'summary' => [],
+                    ];
+                    
+                    $tmp['repository'] = $item->repository->full_name;
+                    $tmp['file'] = $item->path;
+                    $tmp['link'] = $item->html_url;
+                    
+                    $l = 0;
+                    $t_fragment = explode( "\n", $item->text_matches[0]->fragment );
+                    foreach( $t_fragment as $f ) {
+                        $f = trim( $f );
+                        if( stristr($f,$this->string) ) {
+                            $tmp['summary'][--$l] = $f;
+                        }
+                    }
+                    
+                    $this->t_result[] = $tmp;
+                }
+            }
 		}
 		
 		echo "\n";

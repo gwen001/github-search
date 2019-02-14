@@ -17,7 +17,11 @@ t_keywords=(
 	"id_rsa"
 	"id_dsa"
 	"amazonaws.com"
+	"storage.google"
+	"storage.cloud.google"
+	"digitaloceanspaces.com"
 	"cloudfront.net"
+	"blob.core.windows.net"
 )
 
 

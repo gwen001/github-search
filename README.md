@@ -12,7 +12,9 @@ Options:
 	-f	looking for file
 	-h	print this help
 	-l	language filter
+	-m	look for commit, -o and -p are required
 	-n	no color
+	-p	provide repository name
 	-o	provide organization name
 	-r	maximum number of results, default 100
 	-s	search string

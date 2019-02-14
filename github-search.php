@@ -23,7 +23,9 @@ set_time_limit( 0 );
 	$options .= 'f:';
 	$options .= 'h';
 	$options .= 'l:';
+	$options .= 'm';
 	$options .= 'n';
+	$options .= 'p:';
 	$options .= 'o:';
 	$options .= 'r:';
 	$options .= 's:';
@@ -58,12 +60,20 @@ set_time_limit( 0 );
 				$gsearch->setLanguage( $v );
 				break;
 			
+			case 'm':
+				$gsearch->searchCommit( true );
+				break;
+			
 			case 'n':
 				$gsearch->setColorOutput( false );
 				break;
 			
 			case 'o':
 				$gsearch->setOrganization( $v );
+				break;
+			
+			case 'p':
+				$gsearch->setRepository( $v );
 				break;
 			
 			case 'r':
