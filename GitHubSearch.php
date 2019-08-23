@@ -17,7 +17,7 @@ class GitHubSearch
 
 	private $search_url = '/search?utf8=%E2%9C%93&o=desc&type=Code&s=&q=';
 	private $search_api_url = '/search/code';
-    private $search_api_parameters = '?sort=updated&order=desc&q=';
+    private $search_api_parameters = '?sort=updated&order=asc&q=';
     private $search_api_repos = '/repos';
     
 	private $max_result = 100;

@@ -1,3 +1,5 @@
+#!/usr/bin/php
+
 <?php
 
 function usage( $err=null ) {

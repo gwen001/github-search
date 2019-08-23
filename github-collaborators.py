@@ -9,7 +9,6 @@ import json
 import requests
 import argparse
 from termcolor import colored
-# from prettytable import PrettyTable
 from texttable import Texttable
 
 GITHUB_API_URL = 'https://api.github.com'
