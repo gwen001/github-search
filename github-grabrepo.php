@@ -6,8 +6,8 @@ function usage( $err=null ) {
 	echo 'Usage: php '.$_SERVER['argv'][0]." -o/-u <organization/user> [OPTIONS]\n\n";
 	echo "Options:\n";
 	echo "\t-d\tset destination directory (required)\n";
-	echo "\t-o\tset organisation (required)\n";
-	echo "\t-u\tset user token (required)\n";
+	echo "\t-o\tset organization (org or user required)\n";
+	echo "\t-u\tset user (org or user required)\n";
 	echo "\n";
 	if( $err ) {
 		echo 'Error: '.$err."!\n";

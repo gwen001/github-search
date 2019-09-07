@@ -28,9 +28,10 @@ n_keywords=${#t_keywords[@]}
 i=0
 
 echo "#### KEYWORDS: $n_keywords"
-# exit
 for (( i=0; i<$n_keywords; i++ )) ; do
-	# echo $t_keywords[$i]
+	keyword=${t_keywords[$i]:1:-1}
+	keyword=`echo $keyword | sed "s/\\\\\\\\\\\\\/\\\\\/g"`
+	t_keywords[$i]=$keyword
 	echo ${t_keywords[$i]}
 done
 echo "####"
@@ -53,32 +54,65 @@ for r in $lrepo ; do
 	echo
 	cd $rr
 
-	for (( i=0; i<$n_keywords; i++ )) ; do
-		keyword=${t_keywords[$i]}
-		# echo $keyword
-		keyword=${keyword:1:-1}
-		# keyword=`echo $keyword | tr -d '\\\'`
-		keyword=`echo $keyword | sed "s/\\\\\\\\\\\\\/\\\\\/g"`
-		# echo $keyword
+	t_idx=$(find .git/objects/pack/ -name "*.idx")
+	# echo $t_idx
 
-		{
-			find .git/objects/pack/ -name "*.idx" |
-			while read i ; do
-				if [ $fname -eq 1 ] ; then
-					echo $i
-				fi
-				git show-index < "$i" | awk '{print $2}';
-			done;
+	for idx in $t_idx ; do
+		if [ $fname -eq 1 ] ; then
+			echo $idx
+		fi
+		
+		# git show-index < "$idx"
+		t_obj=$(git show-index < "$idx" | awk '{print $2}')
+		# echo $t_obj
 
-			find .git/objects/ -type f | grep -av '/pack/' | awk -F '/' '{print $(NF-1)$NF}';
-		} | while read o ; do
+		for obj in $t_obj ; do
 			if [ $fname -eq 1 ] ; then
-				echo $o
+				echo $obj
 			fi
-			git cat-file -p $o | egrep --color -oa ".{0,30}$keyword.{0,30}"
+			
+			# content=$(git cat-file -p $obj)
+			# in order to save time, search only occurs on first 1M
+			content=$(git cat-file -p $obj | head -c1000000)
+			
+			# size=$(echo $content | wc -c)
+			# echo $size
+			# if [ $size -gt 1500000 ] ; then
+			# 	# if size < 1.5M
+			# 	continue
+			# fi
+
+			for (( i=0; i<$n_keywords; i++ )) ; do
+				keyword=${t_keywords[$i]}
+				# echo $keyword
+
+				echo $content | egrep --color -oa ".{0,50}$keyword.{0,50}"
+				# git cat-file -p $obj | egrep --color -oa ".{0,50}$keyword.{0,50}"
+
+				# {
+				# 	find .git/objects/pack/ -name "*.idx" |
+				# 	while read i ; do
+				# 		# if [ $fname -eq 1 ] ; then
+				# 		# 	echo $i
+				# 		# fi
+				# 		git show-index < "$i" | awk '{print $2}';
+				# 	done;
+
+				# 	find .git/objects/ -type f | grep -av '/pack/' | awk -F '/' '{print $(NF-1)$NF}';
+				# } | while read o ; do
+				# 	if [ $n -ge 5 ] ; then
+				# 		break
+				# 	fi
+				# 	n=$((n+1))
+				# 	if [ $fname -eq 1 ] ; then
+				# 		echo $o
+				# 	fi
+				# 	git cat-file -p $o | egrep --color -oa ".{0,50}$keyword.{0,50}"
+				# 	break
+				# done
+
+			done
 		done
-
-
 	done
 
 	echo
