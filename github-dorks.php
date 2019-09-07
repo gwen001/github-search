@@ -21,12 +21,16 @@ $t_dorks = [
 	'filename:zhrc',
 	'filename:bat',
 	'filename:sh',
+	'filename:zsh',
+	'filename:bash',
 	'filename:py',
 	'filename:npmrc',
 	'filename:dockercfg',
 	'filename:pem',
 	'filename:ppk',
 	'filename:sql',
+	'filename:pass',
+	'filename:global',
 	'filename:credentials',
 	'filename:connections',
 	'filename:s3cfg',
@@ -49,6 +53,7 @@ $t_dorks = [
 	'filename:filezilla.xml',
 	'filename:idea14.key',
 	'filename:makefile',
+	'filename:gitconfig',
 	'filename:prod.exs',
 	'filename:prod.secret.exs',
 	'filename:proftpdpasswd',
@@ -59,6 +64,8 @@ $t_dorks = [
 	'filename:sshd_config',
 '',
 	'dotfiles',
+	'dot-files',
+	'mydotfiles',
 	'config',
 	'dbpasswd',
 	'db_password',
@@ -70,6 +77,8 @@ $t_dorks = [
 	'passwords',
 	'password',
 	'secret.password',
+	'database_password',
+	'sql_password',
 	'passwd',
 	'pass',
 	'pwd',
@@ -127,17 +136,19 @@ $t_dorks = [
 	'gsecr',
 	'jdbc',
 '',
-	'ftp://',
-	'sftp://',
-	'ssh://',
-	'smtp://',
-	'redis://',
-	'mongodb://',
-	'mysql://',
-	'postgresql://',
-	'cassandra://',
-	'sqlite://',
-	'sqlite3://',
+	'ldap',
+	'rsync',
+	'ftp',
+	'sftp',
+	'ssh',
+	'smtp',
+	'redis',
+	'mongodb',
+	'mysql',
+	'postgresql',
+	'sqlite',
+	'sqlite3',
+	'cassandra',
 '',
 	'basic',
 	'auth',
@@ -169,28 +180,48 @@ function __urlencode( $str )
 }
 
 function usage( $err=null ) {
-	echo 'Usage: '.$_SERVER['argv'][0]." <o/u> <org/user>\n";
+	echo 'Usage: '.$_SERVER['argv'][0]." <o/u> <org/user> [<dork file>]\n";
 	if( $err ) {
 		echo 'Error: '.$err."\n";
 	}
 	exit();
 }
 
-if( $_SERVER['argc'] != 3 ) {
+if( $_SERVER['argc'] < 3 || $_SERVER['argc'] > 4 ) {
 	usage();
 }
 
 $ou = $_SERVER['argv'][1];
+$t_orguser = explode( ',', $_SERVER['argv'][2] );
+if( $_SERVER['argc'] == 4 ) {
+	$t_dorks = [];
+	$t_files = explode( ',', $_SERVER['argv'][3] );
+	foreach( $t_files as $f ) {
+		if( is_file($f) ) {
+			$t_dorks = array_merge( $t_dorks, file( $f, FILE_IGNORE_NEW_LINES ) );
+		}
+	}
+}
+// var_dump( $t_dorks );
 
-$cmd = 'cat ~/.gitrobrc | egrep -o "[a-f0-9]{40}"';
-// echo $cmd."\n";
-exec( $cmd, $t_tokens );
+$t_tokens = [];
+if( file_exists('.tokens') ) {
+	$content = file_get_contents( '.tokens' );
+	$m = preg_match_all( '([a-f0-9]{40})', $content, $matches );
+	if( $m ) {
+		$t_tokens = $matches[0];
+	}
+}
+if( !count($t_tokens) ) {
+	usage( 'auth token is missing' );
+}
 $l_token = count( $t_tokens ) - 1;
 // var_dump( $t_tokens );
 
-for( $i=2 ; $i<$_SERVER['argc'] ; $i++ )
+foreach( $t_orguser as $orguser )
 {
-	$orguser = $_SERVER['argv'][$i];
+	echo ">>>>> ".$orguser."\n";
+	// array_unshift( $t_dorks, $orguser );
 	
 	foreach( $t_dorks as $d )
 	{
@@ -207,6 +238,7 @@ for( $i=2 ; $i<$_SERVER['argc'] ; $i++ )
 			}
 
 			if( $l_token >= 0 ) {
+				usleep( 5000 );
 				$cmd = 'github-search -n -t '.$t_tokens[rand(0,$l_token)].' -r 10 -s "'.$d.'" | grep "result(s) found"';
 				// echo $cmd."\n";
 				exec( $cmd, $output );
@@ -234,12 +266,11 @@ for( $i=2 ; $i<$_SERVER['argc'] ; $i++ )
 			Utils::_print( $str, $color );
 		}
 	}
-	
+
+	// array_shift( $t_dorks );
+
 	echo "\n";
 }
 
 
 exit();
-
-?>
-

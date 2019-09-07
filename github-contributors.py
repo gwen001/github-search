@@ -6,11 +6,15 @@
 import os
 import sys
 import json
+import time
+import re
 import requests
 import argparse
+import random
 from termcolor import colored
 from texttable import Texttable
 
+TOKENS_FILE = '.tokens'
 GITHUB_API_URL = 'https://api.github.com'
 
 parser = argparse.ArgumentParser()
@@ -20,9 +24,19 @@ parser.add_argument( "-u","--user",help="user" )
 parser.parse_args()
 args = parser.parse_args()
 
+t_tokens = []
+
 if args.token:
-    auth_token = args.token
+    t_tokens = args.token.split(',')
 else:
+    if os.path.isfile(TOKENS_FILE):
+        fp = open(TOKENS_FILE,'r')
+        for line in fp:
+            r = re.search( '^([a-f0-9]{40})$', line )
+            if r:
+                t_tokens.append( r.group(1) )
+
+if not len(t_tokens):
     parser.error( 'auth token is missing' )
 
 if args.user:
@@ -44,21 +58,22 @@ def ghAPI( endpoint, paging=True ):
     error = 0
     page = 1
     run = True
-    headers = {"Authorization":"token "+auth_token}
+    headers = {"Authorization":"token "+random.choice(t_tokens)}
     datas = []
     
     while run:
         try:
             u = GITHUB_API_URL+endpoint
+            # print(u)
             if paging:
                 u = u + '?page='+str(page)
-            # print( u )
+            print( u )
             r = requests.get( u, headers=headers )
             page = page + 1
             if len(r.text):
-                if type(r.json()) is dict:
+                if type(r.json()) is dict and 'documentation_url' not in r.json():
                     datas.append( r.json() )
-                elif type(r.json()) is list:
+                elif type(r.json()) is list and 'documentation_url' not in r.json():
                     datas = datas + r.json()
                 else:
                     run = False
@@ -89,7 +104,7 @@ for repo in r:
         n_notfork = n_notfork + 1
 
 print( '[+] %d are not fork.' % n_notfork )
-print( '[+] grabbing collaborators...\n' )
+print( '[+] grabbing contributors...\n' )
 t_collab = {}
 i = 0
 
@@ -111,23 +126,21 @@ for repo in r:
 
         sys.stdout.write("\n")
 
-print( colored('[+] %d collaborators found, reading profiles...\n' % len(t_collab),'green') )
+print( colored('[+] %d contributors found, reading profiles...\n' % len(t_collab),'green') )
 tab = Texttable( 300 )
 tab.header( ['Contributions','Profile','Name','Company'] )
 # tab.set_max_width( 100 )
 
 for login,collab in sorted(t_collab.items(),reverse=True, key=lambda item:item[1]):
-    r = ghAPI( '/users/'+login, False )[0]
-    if login.lower() == gh_user.lower():
-        l = colored( 'https://github.com/'+login,'yellow' )
-    else:
-        l = 'https://github.com/'+login
-    if type(r['company']) is unicode and r['company'].lower() == gh_org.lower():
-        c = colored( r['company'],'cyan' )
-    else:
-        c = r['company']
-    tab.add_row( [collab,l,r['name'],c] )
+    time.sleep( 200/1000 )
+    r = ghAPI( '/users/'+login, False )
+    if not type(r) is bool:
+        r = r[0]
+        if login.lower() == gh_user.lower():
+            l = colored( 'https://github.com/'+login,'yellow' )
+        else:
+            l = 'https://github.com/'+login
+        tab.add_row( [collab,l,r['name'],r['company']] )
 
 print( tab.draw() )
 print("\n")
-

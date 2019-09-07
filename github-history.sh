@@ -75,7 +75,7 @@ for r in $lrepo ; do
 			if [ $fname -eq 1 ] ; then
 				echo $o
 			fi
-			git cat-file -p $o | egrep --color -ai "$keyword"
+			git cat-file -p $o | egrep --color -oa ".{0,30}$keyword.{0,30}"
 		done
 
 

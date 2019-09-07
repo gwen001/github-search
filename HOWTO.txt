@@ -1,0 +1,264 @@
+
+
+              | github HTML | github API | must be authed
+----------------------------------------------------------
+ bio          |      X      |      X     |               
+----------------------------------------------------------
+ status       |      X      |            |               
+----------------------------------------------------------
+ email        |      X      |      X     |       X       
+----------------------------------------------------------
+ company      |      X      |      X     |               
+----------------------------------------------------------
+ organization |      X      |            |               
+  (people)
+
+
+MY METHODOLOGY:
+
+- company official account
+https://github.com/<company>
+
+- users listed in "People"
+https://github.com/orgs/<company>/people
+
+- users retrieved from search
+https://github.com/search?q=<company>&type=Users
+github-users.py -k <company>
+
+- users listed as collaborators
+github-contributors.py -o <company>
+
+- users retrieved from google/linkedin search
+github-employees.py -f <fb_cookie> -t '<company>' -p 50 -m github
+github-employees.py -f <fb_cookie> -t '<company>,<company.com>,<company> developer,<company> engineer,<company> programmer,<company> designer' -p 50 -m linkedin
+
+-> cat reco-github | egrep -o -i "github.com/[-_a-z0-9]*" | cut -d '/' -f 2 | sort -fu | tr "\n" ","
+
+- for all those entities, perform the following code searches (specific to the company, ex: <company>, domain.com)
+github-dorks.php u <user> dorks-short.txt
+
+- for all positive results, perform the following code searches
+github-dorks.php u <user> dorks.txt
+-> https://github.com/search?o=desc&s=indexed&type=Code&q=user%3A<user>+<keyword>
+
+	filename:constants
+	filename:settings
+	filename:database
+	filename:config
+	filename:environment
+	filename:env
+	filename:cfg
+	filename:yml
+	filename:yaml
+	filename:properties
+	filename:zhrc
+	filename:bat
+	filename:sh
+	filename:py
+	filename:npmrc
+	filename:dockercfg
+	filename:pem
+	filename:ppk
+	filename:sql
+	filename:credentials
+	filename:connections
+	filename:s3cfg
+	filename:wp-config
+	filename:htpasswd
+	filename:git-credentials
+	filename:id_dsa
+	filename:id_rsa
+
+	filename:bash_history
+	filename:bash_profile
+	filename:bashrc
+	filename:cshrc
+	filename:history
+	filename:netrc
+	filename:pgpass
+	filename:tugboat
+	filename:dhcpd.conf
+	filename:express.conf
+	filename:filezilla.xml
+	filename:idea14.key
+	filename:makefile
+	filename:prod.exs
+	filename:prod.secret.exs
+	filename:proftpdpasswd
+	filename:recentservers.xml
+	filename:robomongo.json
+	filename:server.cfg
+	filename:shadow
+	filename:sshd_config
+
+	dotfiles
+	config
+	dbpasswd
+	db_password
+	db_username
+	dbuser
+	dbpassword
+	keyPassword
+	storePassword
+	password
+	pass
+	pwd
+	credentials
+	security_credentials
+	connectionstring
+	private
+	private_key
+	token
+	access_token
+	oauth_token
+	secret
+	secret_key
+	secret_token
+	api_secret
+	client_secret
+	key
+	apikey
+	api_key
+	app_key
+	access_key
+	secret_access_key
+	auth
+	login
+	conn.login
+	ftp
+	ssh
+	ssh2_auth_password
+	irc_pass
+	fb_secret
+	sf_username
+	send_keys
+	aws_access
+	bucket_password
+	redis_password
+	root_password
+	gsecr
+	jdbc
+
+	amazonaws.com
+	firebaseio.com
+	cloudfront.net
+	storage.google
+	storage.cloud.google
+	digitaloceanspaces.com
+	mailchimp
+
+- for those entities, grab all not forked repositories
+github-grabrepo.php -d <org> -o <org>
+github-grabrepo.php -d <user> -u <user>
+
+- for all those repositories, perform the following regexp search
+aws key: grep -HanrE ([^A-Z0-9]|^)(AKIA|A3T|AGPA|AIDA|AROA|AIPA|ANPA|ANVA|ASIA)[A-Z0-9]{12,}
+jwt: grep -oriahE ey[A-Za-z0-9_=-]+\\.ey[A-Za-z0-9_=-]+\\.?[A-Za-z0-9_.+/=-]*
+uuid: grep -oriaE [0-9a-fA-F]{8}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{12}
+
+
+###############################################################################################################
+##############################THE OLD ONE ###################################THE OLD ONE ######################
+###############################################################################################################
+
+# php /home/gwen/Security/mytools/github-search/github-grabrepo.php -o deliveroo -d $(pwd)
+
+# for r in $(ls -1) ; do echo $r; trufflehog https://github.com/deliveroo/$r > "$r-trufflehog.txt"; done
+
+# for r in $(ls -1) ; do echo $r; cd $r; git log > "$r-reflog.txt"; cd ..; done
+
+extract-endpoints -d $(pwd) -n "apk,dex,jar,png,so,zip,pack" -r -e "*" -v 1 -k
+
+extract-endpoints -d $(pwd) -n "apk,dex,jar,png,so,zip,pack" -r -e "*" -v 1 -c
+
+extract-endpoints -d $(pwd) -n "apk,dex,jar,png,so,zip,pack" -r -e "*" -v 1
+
+
+
+https://github.com/<company>
+
+- search specific services
+ftp, ssh, http, vpn...
+
+<example.com> <keyword>
+<example> <keyword>
+<company> <keyword>
+org:<company> <keyword>
+user:<user> <keyword>
+<company> language:<python> <keyword>
+<company> language:<python> <keyword> NOT <unwanted keyword>
+
+find people:
+<company> dotfiles
+<company> language:bash
+<company> language:python
+
+-> Recently indexed
+
+
+KEYWORDS:
+
+password
+secret
+credentials
+token
+config
+key
+pass
+login
+ftp
+pwd
+security_credentials
+connectionstring
+JDBC
+ssh2_auth_password
+send_keys
+send,keys
+password
+dbpassword
+dbuser
+access_key
+secret_access_key
+bucket_password
+redis_password
+root_password
+
+filename:.npmrc _auth
+filename:.dockercfg auth
+extension:pem private
+extension:ppk private
+filename:id_rsa or filename:id_dsa
+extension:sql mysql dump
+extension:sql mysql dump password
+filename:credentials aws_access_key_id
+filename:.s3cfg
+filename:wp-config.php
+filename:.htpasswd
+filename:.env DB_USERNAME NOT homestead
+filename:.env MAIL_HOST=smtp.gmail.com
+filename:.git-credentials
+
+dotfiles
+db_password
+aws_access
+access_key
+secret_access_key
+credential
+credentials
+api_secret
+keyPassword
+storePassword
+filename:constants.py
+filename:settings.py
+filename:database.yml
+filename:environment.rb
+filename:env
+filename:cfg
+filename:yml
+filename:properties
+filename:zhrc
+filename:bat
+filename:sh
+filename:py
+
