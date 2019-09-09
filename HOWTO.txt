@@ -43,6 +43,7 @@ github-grabrepo.php -d <user> -u <user>
 
 - for all those repositories, perform the following regexp search
 git-history.py -p <path> -s ~/.gf/mykeys
+git-history.py -p <path> -s <company keyword>
 
 - for all positive results, perform the following code searches
 github-dorks.php u <user> dorks.txt

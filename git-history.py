@@ -98,7 +98,7 @@ def doCheckCommit( commit ):
     try:
         content = subprocess.check_output( 'cd "'+t_stats['repo']+'"; git show '+commit['commit']+' 2>&1', shell=True )
     except Exception as e:
-        sys.stdout.write( colored("[-] error occurred: %s" % e, 'red') )
+        sys.stdout.write( colored("[-] error occurred: %s\n" % e, 'red') )
         return
 
     if t_stats['max_length']:
@@ -122,7 +122,7 @@ for repo in t_repo:
     try:
         output = subprocess.check_output( "cd "+repo+"; git log --pretty=format:'{\"commit\":\"%H\",\"date\":\"%at\"}' 2>&1", shell=True )
     except Exception as e:
-        sys.stdout.write( colored("[-] error occurred: %s" % e, 'red') )
+        sys.stdout.write( colored("[-] error occurred: %s\n" % e, 'red') )
         continue
 
     t_commit = json.loads('['+output.replace('\n',',')+']')
