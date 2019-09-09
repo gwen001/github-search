@@ -97,6 +97,7 @@ def doCheckCommit( commit ):
 
     try:
         content = subprocess.check_output( 'cd "'+t_stats['repo']+'"; git show '+commit['commit']+' 2>&1', shell=True )
+        content = content.decode('utf-8').strip()
     except Exception as e:
         sys.stdout.write( colored("[-] error occurred: %s\n" % e, 'red') )
         return
