@@ -36,7 +36,13 @@ github-employees.py -f <fb_cookie> -t '<company>,<company.com>,<company> develop
 -> cat reco-github | egrep -o -i "github.com/[-_a-z0-9]*" | cut -d '/' -f 2 | sort -fu | tr "\n" ","
 
 - for all those entities, perform the following code searches (specific to the company, ex: <company>, domain.com)
-github-dorks.php u <user> dorks-short.txt
+github-dorks.php u <user> company-dorks.txt
+
+- for all positive results, perform the following code searches
+github-grabrepo.php -d <user> -u <user>
+
+- for all those repositories, perform the following regexp search
+git-history.py -p <path> -s ~/.gf/mykeys
 
 - for all positive results, perform the following code searches
 github-dorks.php u <user> dorks.txt
@@ -147,15 +153,6 @@ github-dorks.php u <user> dorks.txt
 	storage.cloud.google
 	digitaloceanspaces.com
 	mailchimp
-
-- for those entities, grab all not forked repositories
-github-grabrepo.php -d <org> -o <org>
-github-grabrepo.php -d <user> -u <user>
-
-- for all those repositories, perform the following regexp search
-aws key: grep -HanrE ([^A-Z0-9]|^)(AKIA|A3T|AGPA|AIDA|AROA|AIPA|ANPA|ANVA|ASIA)[A-Z0-9]{12,}
-jwt: grep -oriahE ey[A-Za-z0-9_=-]+\\.ey[A-Za-z0-9_=-]+\\.?[A-Za-z0-9_.+/=-]*
-uuid: grep -oriaE [0-9a-fA-F]{8}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{12}
 
 
 ###############################################################################################################

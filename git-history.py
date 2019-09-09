@@ -26,6 +26,8 @@ args = parser.parse_args()
 
 if args.path:
     path = args.path
+    if not os.path.isdir(path):
+        parser.error( 'path not found' )
 else:
     parser.error( 'path is missing' )
 
