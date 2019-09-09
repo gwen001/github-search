@@ -54,11 +54,9 @@ else:
 
 t_regexp = []
 if args.search:
-    gf = expanduser('~') + '/.gf/' + args.search + '.json'
-    # print(gf)
-    if os.path.isfile(gf):
-        sys.stdout.write( colored('[+] loading regexp: %s\n' %  gf, 'green') )
-        with open(gf) as json_file:
+    if os.path.isfile(args.search):
+        sys.stdout.write( colored('[+] loading regexp: %s\n' %  args.search, 'green') )
+        with open(args.search) as json_file:
             data = json.load(json_file)
         if 'pattern' in data:
             t_regexp.append( data['pattern'] )
