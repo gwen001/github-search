@@ -115,7 +115,7 @@ def doCheckCommit( commit ):
 
 for repo in t_repo:
     repo = repo.replace('.git','')
-    sys.stdout.write( '[+] %s\n' %  repo )
+    sys.stdout.write( colored('[+] %s\n' %  repo,'cyan') )
 
     try:
         output = subprocess.check_output( "cd "+repo+"; git log --pretty=format:'{\"commit\":\"%H\",\"date\":\"%at\"}' 2>&1", shell=True )
