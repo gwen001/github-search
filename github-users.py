@@ -10,6 +10,7 @@ import time
 import argparse
 from termcolor import colored
 from texttable import Texttable
+from multiprocessing.dummy import Pool
 
 TOKENS_FILE = '.tokens'
 
@@ -67,35 +68,72 @@ total_found = 0
 tab = Texttable( 300 )
 tab.header( ['login','html_url','name','email','company','public_repos'] )
 
+r_json = searchUser( keyword, 1 )
+if len(r_json) and 'documentation_url' in r_json:
+    print( colored("[-] error occurred!", 'red') )
+    exit()
 
-for page in range(1,1000):
+total_found = r_json['total_count']
+max_page = math.ceil( r_json['total_count'] / 30)
+sys.stdout.write( colored('[+] %d users found, %d pages.\n' %  (total_found,max_page), 'green') )
+sys.stdout.write( '[+] retrieving user list...\n' )
+
+
+def doGetUserList( page ):
+    time.sleep( 200/1000 )
+    sys.stdout.write( 'progress: %d/%d\r' %  (t_stats['n_current'],t_stats['n_max_page']) )
+    sys.stdout.flush()
+    t_stats['n_current'] = t_stats['n_current'] + 1
     r_json = searchUser( keyword, page )
-    # print(r_json)
-    if len(r_json) and 'documentation_url' in r_json:
-        break
+    if len(r_json) and not 'documentation_url' in r_json:
+        for u in r_json['items']:
+            if u['login'] not in t_users:
+                t_users.append( u['login'] )
 
-    if page == 1:
-        total_found = r_json['total_count']
-        max_page = math.ceil( r_json['total_count'] / 30)
-        sys.stdout.write( colored('[+] %d users found.\n' %  (total_found), 'green') )
-        sys.stdout.write( '[+] retrieving profiles...\n' )
+t_users = []
+t_profiles = []
+t_stats = {
+    'n_current': 0,
+    'n_max_page': max_page
+}
 
-    if not total_found:
-        break
-    
-    sys.stdout.write( '[+] %d/%d pages\n' %  (page,max_page) )
+pool = Pool( 5 )
+pool.map( doGetUserList, range(1,t_stats['n_max_page']) )
+pool.close()
+pool.join()
 
-    for u in r_json['items']:
-        # print(u)
-        time.sleep( 200/1000 )
-        t_profile = getUser( u['login'] )
-        # print(type(t_profile))
-        # print(t_profile)
-        if len(t_profile) and not 'documentation_url' in t_profile:
-            tab.add_row( [t_profile['login'],t_profile['html_url'],t_profile['name'],t_profile['email'],t_profile['company'],t_profile['public_repos']] )
+# print( t_users )
 
-    if page >= max_page:
-        break
+sys.stdout.write( colored('[+] %d login found.\n' %  (len(t_users)), 'green') )
+sys.stdout.write( '[+] retrieving profiles...\n' )
 
-if total_found:
+t_stats['n_users'] = len(t_users)
+t_stats['n_current'] = 0
+
+def doGetProfile( login ):
+    time.sleep( 200/1000 )
+    sys.stdout.write( 'progress: %d/%d\r' %  (t_stats['n_current'],t_stats['n_users']) )
+    sys.stdout.flush()
+    t_stats['n_current'] = t_stats['n_current'] + 1
+    r_json = getUser( login )
+    if len(r_json) and not 'documentation_url' in r_json:
+        tmp = {}
+        tmp['login'] = r_json['login']
+        tmp['html_url'] = r_json['html_url']
+        tmp['name'] = r_json['name']
+        tmp['email'] = r_json['email']
+        tmp['company'] = r_json['company']
+        tmp['public_repos'] = r_json['public_repos']
+        t_profiles.append( tmp )
+        tab.add_row( [r_json['login'],r_json['html_url'],r_json['name'],r_json['email'],r_json['company'],r_json['public_repos']] )
+
+
+pool = Pool( 5 )
+pool.map( doGetProfile, t_users )
+pool.close()
+pool.join()
+
+if len(t_profiles):
     print( tab.draw() )
+
+exit()

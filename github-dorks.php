@@ -205,8 +205,9 @@ if( $_SERVER['argc'] == 4 ) {
 // var_dump( $t_dorks );
 
 $t_tokens = [];
-if( file_exists('.tokens') ) {
-	$content = file_get_contents( '.tokens' );
+$f_tokens = dirname(__FILE__).'/.tokens';
+if( file_exists($f_tokens) ) {
+	$content = file_get_contents( $f_tokens );
 	$m = preg_match_all( '([a-f0-9]{40})', $content, $matches );
 	if( $m ) {
 		$t_tokens = $matches[0];
