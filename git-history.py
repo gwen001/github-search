@@ -15,6 +15,10 @@ from os.path import expanduser
 from colored import fg, bg, attr
 from multiprocessing.dummy import Pool
 
+# for i in range(0,256):
+#     sys.stdout.write( '%s[%d] Hello world.%s\n' %  (fg(i),i,attr(0)) )
+# exit()
+
 parser = argparse.ArgumentParser()
 parser.add_argument( "-p","--path",help="path to scan" )
 parser.add_argument( "-d","--date",help="do no check commit before this date" )
@@ -112,7 +116,7 @@ def doCheckCommit( commit ):
             for rr in r:
                 if not rr[1] in t_stats['t_findings']:
                     t_stats['t_findings'].append( rr[1] )
-                    str = commit['commit'] +' : ' + rr[0].lstrip() + ('%s%s%s'%(fg('red_3b'),rr[1],attr(0))) + rr[-1].rstrip()
+                    str = commit['commit'] +' : ' + rr[0].lstrip() + ('%s%s%s'%(fg('light_red'),rr[1],attr(0))) + rr[-1].rstrip()
                     sys.stdout.write( '%s\n' % str )
 
 
