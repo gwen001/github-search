@@ -100,11 +100,15 @@ def doCheckCommit( commit ):
         return
 
     try:
-        content = subprocess.check_output( 'cd "'+t_stats['repo']+'"; git show '+commit['commit']+' 2>&1', shell=True )
-        content = content.decode('utf-8').strip()
+        original_content = subprocess.check_output( 'cd "'+t_stats['repo']+'"; git show '+commit['commit']+' 2>&1', shell=True )
     except Exception as e:
         sys.stdout.write( "%s[-] error occurred: %s%s\n" % (fg('red'),e,attr(0)) )
         return
+
+    try:
+        content = original_content.decode('utf-8').strip()
+    except Exception as e:
+        content = original_content.strip()
 
     if t_stats['max_length']:
         content = content[0:max_length]
