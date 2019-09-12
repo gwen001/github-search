@@ -12,7 +12,7 @@ import random
 import subprocess
 import time
 from os.path import expanduser
-from termcolor import colored
+from colored import fg, bg, attr
 from multiprocessing.dummy import Pool
 
 parser = argparse.ArgumentParser()
@@ -57,7 +57,7 @@ else:
 t_regexp = []
 if args.search:
     if os.path.isfile(args.search):
-        sys.stdout.write( colored('[+] loading regexp: %s\n' %  args.search, 'green') )
+        sys.stdout.write( '%s[+] loading regexp: %s%s\n' %  (fg('green'),args.search,attr(0)) )
         with open(args.search) as json_file:
             data = json.load(json_file)
         if 'pattern' in data:
@@ -75,15 +75,15 @@ l_regexp = len(t_regexp)
 if not l_regexp:
     parser.error( 'search term is missing' )
 
-sys.stdout.write( colored('[+] %d regexp found.\n' %  l_regexp, 'green') )
+sys.stdout.write( '%s[+] %d regexp found.%s\n' %  (fg('green'),l_regexp,attr(0)) )
 print( "\n".join(t_regexp) )
-sys.stdout.write( colored('[+] scanning directory: %s\n' %  path, 'green') )
+sys.stdout.write( '%s[+] scanning directory: %s%s\n' %  (fg('green'),path,attr(0)) )
 
-output = subprocess.check_output( "find "+path+" -type d -name '.git'", shell=True ) 
+output = subprocess.check_output( "find "+path+" -type d -name '.git'", shell=True )
 t_repo = output.strip().split("\n")
 l_repo = len(t_repo)
-sys.stdout.write( colored('[+] %d repositories found.\n' %  l_repo, 'green') )
-sys.stdout.write( colored('[+] options are ->  max_threads: %d, max_date: %s, max_length: %s\n' %  (max_threads,str_max_date,str_max_length), 'green') )
+sys.stdout.write( '%s[+] %d repositories found.%s\n' %  (fg('green'),l_repo,attr(0)) )
+sys.stdout.write( '%s[+] options are ->  max_threads: %d, max_date: %s, max_length: %s%s\n' %  (fg('green'),max_threads,str_max_date,str_max_length,attr(0)) )
 
 
 def doCheckCommit( commit ):
@@ -99,7 +99,7 @@ def doCheckCommit( commit ):
         content = subprocess.check_output( 'cd "'+t_stats['repo']+'"; git show '+commit['commit']+' 2>&1', shell=True )
         content = content.decode('utf-8').strip()
     except Exception as e:
-        sys.stdout.write( colored("[-] error occurred: %s\n" % e, 'red') )
+        sys.stdout.write( "%s[-] error occurred: %s%s\n" % (fg('red'),e,attr(0)) )
         return
 
     if t_stats['max_length']:
@@ -112,18 +112,18 @@ def doCheckCommit( commit ):
             for rr in r:
                 if not rr[1] in t_stats['t_findings']:
                     t_stats['t_findings'].append( rr[1] )
-                    str = commit['commit'] +' : ' + rr[0].lstrip() + colored('%s' %  rr[1], 'red') + rr[-1].rstrip()
+                    str = commit['commit'] +' : ' + rr[0].lstrip() + ('%s%s%s'%(fg('red_3b'),rr[1],attr(0))) + rr[-1].rstrip()
                     sys.stdout.write( '%s\n' % str )
 
 
 for repo in t_repo:
     repo = repo.replace('.git','')
-    sys.stdout.write( colored('[+] %s\n' %  repo,'cyan') )
+    sys.stdout.write( '%s[+] %s%s\n' %  (fg('cyan'),repo,attr(0)) )
 
     try:
         output = subprocess.check_output( "cd "+repo+"; git log --pretty=format:'{\"commit\":\"%H\",\"date\":\"%at\"}' 2>&1", shell=True )
     except Exception as e:
-        sys.stdout.write( colored("[-] error occurred: %s\n" % e, 'red') )
+        sys.stdout.write( "%s[-] error occurred: %s%s\n" % (fg('red'),e,attr(0)) )
         continue
 
     t_commit = json.loads('['+output.replace('\n',',')+']')

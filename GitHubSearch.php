@@ -428,15 +428,18 @@ class GitHubSearch
                     $tmp['file'] = $item->path;
                     $tmp['link'] = $item->html_url;
                     
-                    $l = 0;
-                    $t_fragment = explode( "\n", $item->text_matches[0]->fragment );
-                    foreach( $t_fragment as $f ) {
-                        $f = trim( $f );
-                        if( stristr($f,$this->string) ) {
-                            $tmp['summary'][--$l] = $f;
-                        }
-                    }
-                    
+					$l = 0;
+
+					if( isset($item->text_matches) && is_array($item->text_matches) && count($item->text_matches) ) {
+						$t_fragment = explode( "\n", $item->text_matches[0]->fragment );
+						foreach( $t_fragment as $f ) {
+							$f = trim( $f );
+							if( stristr($f,$this->string) ) {
+								$tmp['summary'][--$l] = $f;
+							}
+						}
+					}
+
                     $this->t_result[] = $tmp;
                 }
             }
