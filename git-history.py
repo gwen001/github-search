@@ -14,31 +14,25 @@ import time
 from os.path import expanduser
 from colored import fg, bg, attr
 from multiprocessing.dummy import Pool
-from pynput import keyboard
+# from pynput import keyboard
+import keyboard
 
 # for i in range(0,256):
 #     sys.stdout.write( '%s[%d] Hello world.%s\n' %  (fg(i),i,attr(0)) )
 # exit()
 
 
-def on_release(key):
-    try:
-        kk = key.char
-    except AttributeError:
-        kk = key
-    
-    if kk == 'q' or kk == keyboard.Key.esc:
+def on_press( key ):
+    if key.name == 'q' or key.name == 'esc':
         t_stats['getout'] = True
-    if kk == 'r':
+    if key.name == 'r':
         t_stats['skip_repo'] = True
-    # if kk == 'c':
-    #     t_stats['skip_commit'] = True
-    # if kk == 'e':
-    #     t_stats['skip_regexp'] = True
+    if key.name == 'c':
+        t_stats['skip_commit'] = True
+    if key.name == 'e':
+        t_stats['skip_regexp'] = True
 
-# ...or, in a non-blocking fashion:
-listener = keyboard.Listener(on_release=on_release)
-listener.start()
+# keyboard.on_press(on_press)
 
 
 parser = argparse.ArgumentParser()
