@@ -12,12 +12,12 @@ class GitHubSearch
 	const GITHUB_URL = 'https://github.com';
 	const GITHUB_API_URL = 'https://api.github.com';
 	const GITHUB_PAGE_RESULT = 10;
-	const GITHUB_API_PAGE_RESULT = 50;
+	const GITHUB_API_PAGE_RESULT = 30;
 	const USER_AGENT = 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:52.0) Gecko/20100101 Firefox/52.0';
 
-	private $search_url = '/search?utf8=%E2%9C%93&o=desc&type=Code&s=&q=';
+	private $search_url = '/search?utf8=%E2%9C%93&sort=indexed&order=desc&type=Code&s=&q=';
 	private $search_api_url = '/search/code';
-    private $search_api_parameters = '?sort=updated&order=asc&q=';
+    private $search_api_parameters = '?sort=indexed&order=desc&q=';
     private $search_api_repos = '/repos';
     
 	private $max_result = 100;
@@ -34,6 +34,9 @@ class GitHubSearch
 
 	private $language = null;
 
+	private $download_results = false;
+	private $download_directory = '';
+
 	private $organization = null;
 
 	private $repository = null;
@@ -45,6 +48,37 @@ class GitHubSearch
 	private $search_params = [];
 
 	private $t_result = [];
+
+
+	public function __construct()
+	{
+		$f_tokens = dirname(__FILE__).'/.tokens';
+		if( file_exists($f_tokens) ) {
+			$content = file_get_contents( $f_tokens );
+			$m = preg_match_all( '([a-f0-9]{40})', $content, $matches );
+			if( $m ) {
+				$this->auth_token = $matches[0];
+			}
+		}
+	}
+
+
+	public function isDownloadEnabled() {
+		return $this->download_results;
+	}
+	public function enableDownload() {
+		$this->download_results = true;
+		$this->download_directory = dirname(__FILE__).'/results/'.time();
+		if( !is_dir($this->download_directory) ) {
+			if( !mkdir($this->download_directory,0777,true) ) {
+				$this->disableDownload();
+			}
+		}
+	}
+	public function disableDownload() {
+		$this->download_results = false;
+		$this->download_directory = '';
+	}
 
 
 	public function getCookie() {
@@ -416,6 +450,10 @@ class GitHubSearch
             {
                 foreach( $t_json->items as $item )
                 {
+					if( $this->download_results ) {
+						$this->downloadResult( $item );
+					}
+
                     $tmp = [
                         'repository' => '',
                         'file' => '',
@@ -448,6 +486,19 @@ class GitHubSearch
 		echo "\n";
 
 		return count($this->t_result);
+	}
+
+
+	private function downloadResult( $item )
+	{
+		$filename = $item->repository->full_name.'_'.$item->path.'.'.$item->sha;
+		$filename = $this->download_directory.str_replace('/','_',$filename);
+		// https://github.com/nueks/dotfiles/blob/cb5c5191b9022a89bab6e82dfd9de07a47922e87/ssh/.ssh/config
+		// https://raw.githubusercontent.com/nueks/dotfiles/cb5c5191b9022a89bab6e82dfd9de07a47922e87/ssh/.ssh/config
+		$url = str_replace( 'https://github.com/', 'https://raw.githubusercontent.com/', $item->html_url );
+		$url = str_replace( '/blob', '', $url );
+		$content = @file_get_contents( $url );
+		return file_put_contents( $filename, $content );
 	}
 
 

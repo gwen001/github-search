@@ -19,6 +19,7 @@ set_time_limit( 0 );
 {
 	$options = '';
 	$options .= 'c:';
+	$options .= 'd';
 	$options .= 'e:';
 	$options .= 'f:';
 	$options .= 'h';
@@ -42,6 +43,10 @@ set_time_limit( 0 );
 		{
 			case 'c':
 				$gsearch->setCookie( $v );
+				break;
+
+			case 'd':
+				$gsearch->enableDownload();
 				break;
 
 			case 'e':

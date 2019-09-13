@@ -1,4 +1,4 @@
-#!/usr/bin/python2.7
+#!/usr/bin/python3
 
 # I don't believe in license.
 # You can do whatever you want with this program.
@@ -14,10 +14,32 @@ import time
 from os.path import expanduser
 from colored import fg, bg, attr
 from multiprocessing.dummy import Pool
+from pynput import keyboard
 
 # for i in range(0,256):
 #     sys.stdout.write( '%s[%d] Hello world.%s\n' %  (fg(i),i,attr(0)) )
 # exit()
+
+
+def on_release(key):
+    try:
+        kk = key.char
+    except AttributeError:
+        kk = key
+    
+    if kk == 'q' or kk == keyboard.Key.esc:
+        t_stats['getout'] = True
+    if kk == 'r':
+        t_stats['skip_repo'] = True
+    # if kk == 'c':
+    #     t_stats['skip_commit'] = True
+    # if kk == 'e':
+    #     t_stats['skip_regexp'] = True
+
+# ...or, in a non-blocking fashion:
+listener = keyboard.Listener(on_release=on_release)
+listener.start()
+
 
 parser = argparse.ArgumentParser()
 parser.add_argument( "-p","--path",help="path to scan" )
@@ -83,7 +105,7 @@ sys.stdout.write( '%s[+] %d regexp found.%s\n' %  (fg('green'),l_regexp,attr(0))
 print( "\n".join(t_regexp) )
 sys.stdout.write( '%s[+] scanning directory: %s%s\n' %  (fg('green'),path,attr(0)) )
 
-output = subprocess.check_output( "find "+path+" -type d -name '.git'", shell=True )
+output = subprocess.check_output( "find "+path+" -type d -name '.git'", shell=True ).decode('utf-8')
 t_repo = output.strip().split("\n")
 l_repo = len(t_repo)
 sys.stdout.write( '%s[+] %d repositories found.%s\n' %  (fg('green'),l_repo,attr(0)) )
@@ -91,6 +113,12 @@ sys.stdout.write( '%s[+] options are ->  max_threads: %d, max_date: %s, max_leng
 
 
 def doCheckCommit( commit ):
+    t_stats['skip_commit'] = False
+    t_stats['skip_regexp'] = False
+
+    if t_stats['getout'] or t_stats['skip_repo']:
+        return
+    
     sys.stdout.write( 'progress: %d/%d\r' %  (t_stats['n_current'],t_stats['n_commit']) )
     sys.stdout.flush()
     t_stats['n_current'] = t_stats['n_current'] + 1
@@ -114,6 +142,18 @@ def doCheckCommit( commit ):
         content = content[0:max_length]
 
     for regexp in t_regexp:
+        if t_stats['getout'] or t_stats['skip_repo']:
+            # print('R')
+            break
+        if t_stats['skip_commit']:
+            # print('C')
+            t_stats['skip_commit'] = False
+            break
+        if t_stats['skip_regexp']:
+            # print('E')
+            t_stats['skip_regexp'] = False
+            continue
+
         r = re.findall( '(.{0,50})('+regexp+')(.{0,50})', content )
         # print(regexp)
         if r:
@@ -123,13 +163,22 @@ def doCheckCommit( commit ):
                     str = commit['commit'] +' : ' + rr[0].lstrip() + ('%s%s%s'%(fg('light_red'),rr[1],attr(0))) + rr[-1].rstrip()
                     sys.stdout.write( '%s\n' % str )
 
+t_stats = {
+    'getout': False,
+    'skip_repo': False,
+    'skip_commit': False,
+    'skip_regexp': False
+}
 
 for repo in t_repo:
+    if t_stats['getout']:
+        exit()
+    
     repo = repo.replace('.git','')
     sys.stdout.write( '%s[+] %s%s\n' %  (fg('cyan'),repo,attr(0)) )
 
     try:
-        output = subprocess.check_output( "cd "+repo+"; git log --pretty=format:'{\"commit\":\"%H\",\"date\":\"%at\"}' 2>&1", shell=True )
+        output = subprocess.check_output( "cd "+repo+"; git log --pretty=format:'{\"commit\":\"%H\",\"date\":\"%at\"}' 2>&1", shell=True ).decode('utf-8')
     except Exception as e:
         sys.stdout.write( "%s[-] error occurred: %s%s\n" % (fg('red'),e,attr(0)) )
         continue
@@ -137,14 +186,23 @@ for repo in t_repo:
     t_commit = json.loads('['+output.replace('\n',',')+']')
     # print(t_commit)
 
-    t_stats = {
-        'max_date': max_date,
-        'max_length': max_length,
-        'n_current': 0,
-        'n_commit': len(t_commit),
-        'repo': repo,
-        't_findings': []
-    }
+    # t_stats = {
+    #     'max_date': max_date,
+    #     'max_length': max_length,
+    #     'n_current': 0,
+    #     'n_commit': len(t_commit),
+    #     'repo': repo,
+    #     't_findings': []
+    # }
+    t_stats['skip_repo'] = False
+    t_stats['skip_commit'] = False
+    t_stats['skip_regexp'] = False
+    t_stats['max_date'] = max_date
+    t_stats['max_length'] = max_length
+    t_stats['n_current'] = 0
+    t_stats['n_commit'] = len(t_commit)
+    t_stats['repo'] = repo
+    t_stats['t_findings'] = []
 
     pool = Pool( max_threads )
     pool.map( doCheckCommit, t_commit )
