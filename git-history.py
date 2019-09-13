@@ -32,7 +32,7 @@ def on_press( key ):
     if key.name == 'e':
         t_stats['skip_regexp'] = True
 
-# keyboard.on_press(on_press)
+keyboard.on_press(on_press)
 
 
 parser = argparse.ArgumentParser()
