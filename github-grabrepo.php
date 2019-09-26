@@ -8,6 +8,7 @@ function usage( $err=null ) {
 	echo "\t-d\tset destination directory (required)\n";
 	echo "\t-o\tset organization (org or user required)\n";
 	echo "\t-u\tset user (org or user required)\n";
+	echo "\t-f\tgrab forked repositories as well\n";
 	echo "\n";
 	if( $err ) {
 		echo 'Error: '.$err."!\n";
@@ -19,12 +20,19 @@ define( 'PER_PAGE', 100 );
 
 $options = '';
 $options .= 'd:'; // source directory
+$options .= 'f'; // forks
 $options .= 'o:'; // organization
 $options .= 'u:'; // user
 $t_options = getopt( $options );
 //var_dump($t_options);
 if( !count($t_options) ) {
 	usage();
+}
+
+if( isset($t_options['f']) ) {
+	$_forks = true;
+} else {
+	$_forks = false;
 }
 
 if( isset($t_options['d']) ) {
@@ -95,7 +103,7 @@ do
 	
 	foreach( $t_json as $repo )
 	{
-		if( (int)$repo['fork'] == 0 ) {
+		if( (int)$repo['fork'] == 0 || $_forks ) {
 			$n_clone++;
 			$cmd = 'git clone '.$repo['html_url'].' "'.$_directory.'/'.$repo['name'].'"';
 			echo $cmd."\n";

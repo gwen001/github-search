@@ -14,7 +14,6 @@ import random
 from termcolor import colored
 from texttable import Texttable
 
-TOKENS_FILE = '.tokens'
 GITHUB_API_URL = 'https://api.github.com'
 
 parser = argparse.ArgumentParser()
@@ -29,8 +28,9 @@ t_tokens = []
 if args.token:
     t_tokens = args.token.split(',')
 else:
-    if os.path.isfile(TOKENS_FILE):
-        fp = open(TOKENS_FILE,'r')
+    tokens_file = os.path.dirname(os.path.realpath(__file__))+'/.tokens'
+    if os.path.isfile(tokens_file):
+        fp = open(tokens_file,'r')
         for line in fp:
             r = re.search( '^([a-f0-9]{40})$', line )
             if r:
@@ -108,6 +108,7 @@ print( '[+] grabbing contributors...\n' )
 t_collab = {}
 i = 0
 
+
 for repo in r:
     # if len(t_collab) >= 10:
     #     break
@@ -128,19 +129,63 @@ for repo in r:
 
 print( colored('[+] %d contributors found, reading profiles...\n' % len(t_collab),'green') )
 tab = Texttable( 300 )
-tab.header( ['Contributions','Profile','Name','Company'] )
+tab.header( ['Contributions','Profile','Name','Email','Company','Public repos'] )
 # tab.set_max_width( 100 )
+
+
+
+def grabUserHtmlLight( ghaccount, login ):
+    url = 'https://github.com/'+login
+
+    try:
+        r = requests.get( url, timeout=5 )
+    except Exception as e:
+        print( colored("[-] error occurred: %s" % e, 'red') )
+        return False
+
+    if not 'Not Found' in r.text:
+        r_org = re.search( 'data-hovercard-url="/orgs/([^/]*)/hovercard"', r.text, re.MULTILINE|re.IGNORECASE )
+        if r_org:
+            o = r_org.group(1).lower()[:20]
+            if o not in ghaccount['orgs']:
+                ghaccount['orgs'].append( o )
+        
+        r_org = re.search( 'aria-label="Organization: ([^"]*)"', r.text, re.MULTILINE|re.IGNORECASE )
+        if r_org:
+            o = r_org.group(1).lower()[:20]
+            if o not in ghaccount['orgs']:
+                ghaccount['orgs'].append( o )
+
+        r_status = re.search( 'class="user-status-message-wrapper f6 mt-1 text-gray-dark ws-normal lh-condensed">\s*<div>.* at ([^<]*)', r.text, re.MULTILINE|re.IGNORECASE )
+        if r_status and r_status.group(1).lower() not in ghaccount['orgs']:
+            o = r_status.group(1).lower()[:20]
+            if o not in ghaccount['orgs']:
+                ghaccount['orgs'].append( o )
+
+        r_bio = re.search( 'js-user-profile-bio"><div>.* at ([^<]*)', r.text, re.MULTILINE|re.IGNORECASE )
+        if r_bio and r_bio.group(1).lower() not in ghaccount['orgs']:
+            o = r_bio.group(1).lower()[:20]
+            if o not in ghaccount['orgs']:
+                ghaccount['orgs'].append( o )
+
+
 
 for login,collab in sorted(t_collab.items(),reverse=True, key=lambda item:item[1]):
     time.sleep( 200/1000 )
     r = ghAPI( '/users/'+login, False )
+
     if not type(r) is bool:
         r = r[0]
-        if login.lower() == gh_user.lower():
-            l = colored( 'https://github.com/'+login,'yellow' )
+        html_url = 'https://github.com/'+login
+        r['orgs'] = []
+        if type(r['company']) is str and len(r['company']):
+            r['orgs'].append( r['company'] )
+        grabUserHtmlLight( r, login )
+        if len(r['orgs']):
+            orgs = ','.join(r['orgs'])
         else:
-            l = 'https://github.com/'+login
-        tab.add_row( [collab,l,r['name'],r['company']] )
+            orgs = ''
+        tab.add_row( [collab,html_url,r['name'],orgs,r['email'],r['public_repos']] )
 
 print( tab.draw() )
 print("\n")

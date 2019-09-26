@@ -64,6 +64,9 @@ for line in fp:
 # print(t_users)
 # print(t_dorks)
 
+# max_minute_requests = len(t_tokens) * 30
+# sleep_duration = 60 / max_minute_requests
+
 
 def githubApiSearchCode( url ):
     # time.sleep( 0.800 )

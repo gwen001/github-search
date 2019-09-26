@@ -16,17 +16,15 @@ from modules import github
 from multiprocessing.dummy import Pool
 from lockfile import LockFile
 
-TOKENS_FILE = '.tokens'
-
 
 #
 # Handling command line arguments
 #
 parser = argparse.ArgumentParser()
 parser.add_argument( "-m","--mod",help="module to use to search employees on google, available: linkedin, github, default: github" )
-parser.add_argument( "-s","--startpage",help="search start page" )
+parser.add_argument( "-s","--startpage",help="search start page, default 0" )
 parser.add_argument( "-f","--fbcookie",help="your facebook cookie" )
-parser.add_argument( "-t","--term",help="term (usually company name)" )
+parser.add_argument( "-t","--term",help="term (usually company name)", action="append" )
 parser.add_argument( "-p","--page",help="n page to grab, default 10" )
 parser.add_argument( "-r","--resume",help="resume previous session" )
 parser.add_argument( "-i","--input",help="input datas source saved from previous search" )
@@ -48,6 +46,8 @@ else:
 if args.fbcookie:
     fb_cookie = args.fbcookie
 else:
+    fb_cookie = os.getenv('FACEBOOK_COOKIE')
+if not fb_cookie:
     parser.error( 'facebook cookie is missing' )
 
 if args.term:
@@ -72,8 +72,9 @@ t_tokens = []
 if args.token:
     t_tokens = args.token.split(',')
 else:
-    if os.path.isfile(TOKENS_FILE):
-        fp = open(TOKENS_FILE,'r')
+    tokens_file = os.path.dirname(os.path.realpath(__file__))+'/.tokens'
+    if os.path.isfile(tokens_file):
+        fp = open(tokens_file,'r')
         for line in fp:
             r = re.search( '^([a-f0-9]{40})$', line )
             if r:

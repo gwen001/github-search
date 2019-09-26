@@ -243,6 +243,7 @@ class GitHubSearch
 		for( $p=1,$run=true ; $p<=$max_page && $run ; $p++ )
 		{
 			$url = $this->getSearch(true).'&p='.$p;
+			// echo $url."\n";
 
 			$c = curl_init();
 			curl_setopt( $c, CURLOPT_URL, $url );
@@ -385,7 +386,7 @@ class GitHubSearch
             usleep( 10000 );
             
 			$url = $this->getSearchApi(true).'&page='.$p;
-			//var_dump( $url );
+			// echo $url."\n";
 
 			$c = curl_init();
 			curl_setopt( $c, CURLOPT_URL, $url );

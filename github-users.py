@@ -12,8 +12,6 @@ from termcolor import colored
 from texttable import Texttable
 from multiprocessing.dummy import Pool
 
-TOKENS_FILE = '.tokens'
-
 parser = argparse.ArgumentParser()
 parser.add_argument( "-t","--token",help="auth token" )
 parser.add_argument( "-k","--keyword",help="keyword to search" )
@@ -25,8 +23,9 @@ t_tokens = []
 if args.token:
     t_tokens = args.token.split(',')
 else:
-    if os.path.isfile(TOKENS_FILE):
-        fp = open(TOKENS_FILE,'r')
+    tokens_file = os.path.dirname(os.path.realpath(__file__))+'/.tokens'
+    if os.path.isfile(tokens_file):
+        fp = open(tokens_file,'r')
         for line in fp:
             r = re.search( '^([a-f0-9]{40})$', line )
             if r:
@@ -66,7 +65,7 @@ def getUser( login ):
 max_page = 0
 total_found = 0
 tab = Texttable( 300 )
-tab.header( ['login','html_url','name','email','company','public_repos'] )
+tab.header( ['Login','Profile','Name','Email','Company','Public repos'] )
 
 r_json = searchUser( keyword, 1 )
 if len(r_json) and 'documentation_url' in r_json:
@@ -98,7 +97,7 @@ t_stats = {
 }
 
 pool = Pool( 5 )
-pool.map( doGetUserList, range(1,t_stats['n_max_page']) )
+pool.map( doGetUserList, range(0,t_stats['n_max_page']) )
 pool.close()
 pool.join()
 
@@ -107,8 +106,45 @@ pool.join()
 sys.stdout.write( colored('[+] %d login found.\n' %  (len(t_users)), 'green') )
 sys.stdout.write( '[+] retrieving profiles...\n' )
 
+
 t_stats['n_users'] = len(t_users)
 t_stats['n_current'] = 0
+
+
+def grabUserHtmlLight( ghaccount, login ):
+    url = 'https://github.com/'+login
+
+    try:
+        r = requests.get( url, timeout=5 )
+    except Exception as e:
+        print( colored("[-] error occurred: %s" % e, 'red') )
+        return False
+
+    if not 'Not Found' in r.text:
+        r_org = re.search( 'data-hovercard-url="/orgs/([^/]*)/hovercard"', r.text, re.MULTILINE|re.IGNORECASE )
+        if r_org:
+            o = r_org.group(1).lower()[:20]
+            if o not in ghaccount['orgs']:
+                ghaccount['orgs'].append( o )
+        
+        r_org = re.search( 'aria-label="Organization: ([^"]*)"', r.text, re.MULTILINE|re.IGNORECASE )
+        if r_org:
+            o = r_org.group(1).lower()[:20]
+            if o not in ghaccount['orgs']:
+                ghaccount['orgs'].append( o )
+
+        r_status = re.search( 'class="user-status-message-wrapper f6 mt-1 text-gray-dark ws-normal lh-condensed">\s*<div>.* at ([^<]*)', r.text, re.MULTILINE|re.IGNORECASE )
+        if r_status and r_status.group(1).lower() not in ghaccount['orgs']:
+            o = r_status.group(1).lower()[:20]
+            if o not in ghaccount['orgs']:
+                ghaccount['orgs'].append( o )
+
+        r_bio = re.search( 'js-user-profile-bio"><div>.* at ([^<]*)', r.text, re.MULTILINE|re.IGNORECASE )
+        if r_bio and r_bio.group(1).lower() not in ghaccount['orgs']:
+            o = r_bio.group(1).lower()[:20]
+            if o not in ghaccount['orgs']:
+                ghaccount['orgs'].append( o )
+
 
 def doGetProfile( login ):
     time.sleep( 200/1000 )
@@ -122,10 +158,18 @@ def doGetProfile( login ):
         tmp['html_url'] = r_json['html_url']
         tmp['name'] = r_json['name']
         tmp['email'] = r_json['email']
-        tmp['company'] = r_json['company']
         tmp['public_repos'] = r_json['public_repos']
+        # tmp['company'] = r_json['company']
+        tmp['orgs'] = []
+        if type(r_json['company']) is str:
+            tmp['orgs'].append( r_json['company'] )
+        grabUserHtmlLight( tmp, login )
+        if len(tmp['orgs']):
+            orgs = ','.join(tmp['orgs'])
+        else:
+            orgs = ''
         t_profiles.append( tmp )
-        tab.add_row( [r_json['login'],r_json['html_url'],r_json['name'],r_json['email'],r_json['company'],r_json['public_repos']] )
+        tab.add_row( [login,r_json['html_url'],r_json['name'],r_json['email'],orgs,r_json['public_repos']] )
 
 
 pool = Pool( 5 )

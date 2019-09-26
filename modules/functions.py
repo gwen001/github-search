@@ -58,6 +58,7 @@ def displayResults( t_results, t_keywords ):
             else:
                 str_t = employee['text']
             str_t = str_t + "\n" + employee['url']
+            str_t = str_t.replace( '|', '-' )
 
             for login,profile in employee['ghaccount'].items():
                 str_u = str_u + profile['url'] + ' (' + str(profile['repo']) + ')' + "\n"

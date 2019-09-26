@@ -180,7 +180,7 @@ function __urlencode( $str )
 }
 
 function usage( $err=null ) {
-	echo 'Usage: '.$_SERVER['argv'][0]." <o/u> <org/user> [<dork file>]\n";
+	echo 'Usage: '.$_SERVER['argv'][0]." <o/u/n> <org/user> [<dork file>]\n";
 	if( $err ) {
 		echo 'Error: '.$err."\n";
 	}
@@ -219,9 +219,18 @@ if( !count($t_tokens) ) {
 $l_token = count( $t_tokens ) - 1;
 // var_dump( $t_tokens );
 
+$t_exclude_extension = ['md','css','scss','sass','po','hqx'];
+// var_dump( $t_orguser );
+// var_dump( $t_dorks );
+
+$q_suffix = '';
+foreach( $t_exclude_extension as $ext ) {
+	$q_suffix .= ' -extension:'.$ext;
+}
+
 foreach( $t_orguser as $orguser )
 {
-	echo ">>>>> ".$orguser."\n";
+	echo ">>>>> https://github.com/".$orguser."\n";
 	// array_unshift( $t_dorks, $orguser );
 	
 	foreach( $t_dorks as $d )
@@ -234,9 +243,13 @@ foreach( $t_orguser as $orguser )
 		} else {
 			if( $ou == 'o' ) {
 				$d = 'org:'.$orguser.' '.$d;
-			} else {
+			} elseif( $ou == 'u' ) {
 				$d = 'user:'.$orguser.' '.$d;
+			} else {
+				$d = $orguser.' '.$d;
 			}
+
+			$d = $d . $q_suffix;
 
 			if( $l_token >= 0 ) {
 				usleep( 5000 );

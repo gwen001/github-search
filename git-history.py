@@ -90,10 +90,13 @@ if args.search:
 else:
     parser.error( 'search term is missing' )
 
-# print(t_regexp)
 l_regexp = len(t_regexp)
 if not l_regexp:
     parser.error( 'search term is missing' )
+
+t_regexp_compiled = []
+for regexp in t_regexp:
+    t_regexp_compiled.append( re.compile(r'(.{0,50})('+regexp+')(.{0,50})') )
 
 sys.stdout.write( '%s[+] %d regexp found.%s\n' %  (fg('green'),l_regexp,attr(0)) )
 print( "\n".join(t_regexp) )
@@ -135,7 +138,8 @@ def doCheckCommit( commit ):
     if t_stats['max_length']:
         content = content[0:max_length]
 
-    for regexp in t_regexp:
+    # for regexp in t_regexp:
+    for regexp in t_regexp_compiled:
         if t_stats['getout'] or t_stats['skip_repo']:
             # print('R')
             break
@@ -148,7 +152,8 @@ def doCheckCommit( commit ):
             t_stats['skip_regexp'] = False
             continue
 
-        r = re.findall( '(.{0,50})('+regexp+')(.{0,50})', content )
+        r = re.findall( regexp, content )
+        # r = re.findall( '(.{0,50})('+regexp+')(.{0,50})', content )
         # print(regexp)
         if r:
             for rr in r:
