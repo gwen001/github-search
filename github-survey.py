@@ -8,6 +8,7 @@ import json
 import requests
 import random
 import datetime
+import collections
 import urllib.parse
 from pathlib import Path
 from colored import fg, bg, attr
@@ -83,14 +84,12 @@ if 'github_dorks' in t_config:
     for dork,result in t_results.items():
         if type(result) is dict:
             t_new_values[dork] = {}
-            t_new_values[dork]['title'] = 'github search code "' + dork + '"'
+            t_new_values[dork]['title'] = 'github search code \'' + dork + '\''
             t_new_values[dork]['info'] = 'https://github.com/search?o=desc&s=indexed&type=Code&q=' + urllib.parse.quote(dork)
             t_new_values[dork]['data'] = result['total_count']
 
 
-    # t_config['github_dorks'] = t_new_values
-    # t_config['github_dorks'] = sorted( t_new_values.items() )
-    t_config['github_dorks'] = dict( sorted( t_new_values.items() ) )
+    t_config['github_dorks'] = collections.OrderedDict( sorted(t_new_values.items()) )
 
 
 
