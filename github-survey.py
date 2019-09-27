@@ -38,6 +38,7 @@ else:
 t_new_values = {}
 
 
+
 ########### GITHUB SEARCH CODE
 def loadTokens( token_file ):
     tokens_file = os.path.dirname(os.path.realpath(__file__)) + token_file
@@ -93,12 +94,6 @@ if 'github_dorks' in t_config:
 
 
 
-########### SAVING NEW VALUES
-with open(config_file, 'w') as jfile:
-    json.dump( t_config, jfile, indent=4 )
-
-
-
 ########### SLACK NOTIF
 def sendSlackNotif( slack_webhook, message ):
     headers = {"Content-Type": "application/json"}
@@ -120,6 +115,7 @@ if 'slack_webhook' in t_config:
             old_value = "<empty>"
         else:
             old_value = t_old_values[key]['data']
+            t_new_values[key]['old_data'] = t_old_values[key]['data']
         if old_value != t_new_values[key]['data']:
             message = message + t_new_values[key]['title'] + ' : ' + str(old_value) + ' -> ' + str(t_new_values[key]['data']) + "\n" + t_new_values[key]['info'] + "\n\n"
 
@@ -127,3 +123,10 @@ if 'slack_webhook' in t_config:
         message = "---------------- " + datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + " ----------------\n\n" + message
         # print(message)
         sendSlackNotif( t_config['slack_webhook'], message )
+
+
+
+########### SAVING NEW VALUES
+with open(config_file, 'w') as jfile:
+    json.dump( t_config, jfile, indent=4 )
+
