@@ -45,8 +45,12 @@ def loadTokens( token_file ):
     if os.path.isfile(tokens_file):
         return open(tokens_file,'r').read().strip().split("\n")
 
-def githubApiSearchCode( dork ):
-    time.sleep( 0.1 )
+def githubApiSearchCode( dork, confirm=False ):
+    if confirm:
+        s = 1
+    else:
+        s = 0.2
+    time.sleep( s )
     token = random.choice( t_multi_datas['t_tokens'] )
     # token = t_multi_datas['t_tokens'][ t_multi_datas['n_current']%t_multi_datas['rate_limit'] ]
     headers = {"Authorization": "token "+token}
@@ -54,11 +58,14 @@ def githubApiSearchCode( dork ):
     t_multi_datas['n_current'] = t_multi_datas['n_current'] + 1
 
     try:
-        r = requests.get( 'https://api.github.com/search/code?sort=indexed&order=desc&q='+urllib.parse.quote(dork), headers=headers, timeout=5 )
+        u = 'https://api.github.com/search/code?sort=indexed&order=desc&q='+urllib.parse.quote(dork)
+        r = requests.get( u, headers=headers, timeout=5 )
         t_json = r.json()
         if 'total_count' in t_json:
-            t_results[dork] = t_json
-            # t_results[dork] = t_json['total_count']
+            if confirm:
+                return int(t_json['total_count'])
+            else:
+                t_results[dork] = t_json
         else:
             return False
     except Exception as e:
@@ -114,12 +121,15 @@ if 'slack_webhook' in t_config:
         if not type(t_old_values) is dict or not key in t_old_values or not type(t_old_values[key]) is dict or not 'data' in t_old_values[key]:
             old_value = "<empty>"
         else:
-            old_value = t_old_values[key]['data']
-            t_new_values[key]['old_data'] = t_old_values[key]['data']
-        if old_value != t_new_values[key]['data']:
-            message = message + t_new_values[key]['title'] + ' : ' + str(old_value) + ' -> ' + str(t_new_values[key]['data']) + "\n" + t_new_values[key]['info'] + "\n\n"
+            old_value = int(t_old_values[key]['data'])
+        if t_new_values[key]['data'] != old_value:
+            n_confirm = githubApiSearchCode( key, True )
+            if type(n_confirm) is int and n_confirm != old_value:
+                message = message + t_new_values[key]['title'] + ' : ' + str(old_value) + ' -> ' + str(t_new_values[key]['data']) + "\n" + t_new_values[key]['info'] + "\n\n"
+
 
     if len(message):
+        # print(message)
         message = "---------------- " + datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + " ----------------\n\n" + message
         # print(message)
         sendSlackNotif( t_config['slack_webhook'], message )
