@@ -21,8 +21,7 @@ filename:id_rsa
 extension:env
 extension:cfg
 extension:ini
-extension:yml
-extension:yaml
+language:yaml -filename:travis
 extension:properties
 extension:bat
 extension:sh
@@ -79,7 +78,7 @@ root_password
 credentials
 security_credentials
 connectionstring
-private
+private -language:java
 private_key
 master_key
 token

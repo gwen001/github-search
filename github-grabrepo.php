@@ -103,7 +103,7 @@ do
 	
 	foreach( $t_json as $repo )
 	{
-		if( (int)$repo['fork'] == 0 || $_forks ) {
+		if( (int)$repo['fork'] == 0 || $_forks ) {	
 			$n_clone++;
 			$cmd = 'git clone '.$repo['html_url'].' "'.$_directory.'/'.$repo['name'].'"';
 			echo $cmd."\n";

@@ -197,9 +197,9 @@ t_stats = {
 n_start = 0
 
 def doMultiGenerateLogins( employee ):
-    if (t_stats['counter']%10) == 0:
+    # if (t_stats['counter']%10) == 0:
         # show progress
-        sys.stdout.write( 'progress: %d/%d\r' %  (t_stats['counter'],n_results) )
+    sys.stdout.write( 'progress: %d/%d\r' %  (t_stats['counter'],n_results) )
         # sys.stdout.flush()
     t_stats['counter'] = t_stats['counter'] + 1
 
