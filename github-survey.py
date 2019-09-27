@@ -16,7 +16,8 @@ from multiprocessing.dummy import Pool
 
 
 ########### LOAD CONFIG
-config_file = os.path.dirname(os.path.realpath(__file__)) + '/github-survey.json'
+# config_file = os.path.dirname(os.path.realpath(__file__)) + '/github-survey.json'
+config_file = str(Path.home()) + '/.config/github-survey.json'
 
 try:
     with open(config_file) as jfile:
