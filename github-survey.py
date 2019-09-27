@@ -26,13 +26,15 @@ except Exception as e:
     sys.stdout.write( "%s[-] error occurred: %s%s\n" % (fg('red'),e,attr(0)) )
     exit()
 
+if not 'n_multiproc' in t_config:
+    t_config['n_multiproc'] = 10
+
 if 'github_dorks' in t_config:
     t_old_values = t_config['github_dorks']
 else:
     t_old_values = {}
 
 t_new_values = {}
-
 
 
 ########### GITHUB SEARCH CODE
@@ -71,7 +73,7 @@ if 'github_dorks' in t_config:
         'rate_limit': 30,
     }
 
-    pool = Pool( 5 )
+    pool = Pool( t_config['n_multiproc'] )
     pool.map( githubApiSearchCode, t_config['github_dorks'] )
     pool.close()
     pool.join()
