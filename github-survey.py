@@ -88,8 +88,9 @@ if 'github_dorks' in t_config:
             t_new_values[dork]['data'] = result['total_count']
 
 
+    # t_config['github_dorks'] = t_new_values
     # t_config['github_dorks'] = sorted( t_new_values.items() )
-    t_config['github_dorks'] = sorted( t_new_values.items() )
+    t_config['github_dorks'] = dict( sorted( t_new_values.items() ) )
 
 
 
