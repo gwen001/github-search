@@ -1,0 +1,84 @@
+
+term in filename: term in:file
+term in path: term in:path
+from a user: user:USERNAME
+from an org: org:ORGNAME
+in project: repo:USERNAME/REPOSITORY
+
+filepath: term path:app/config (subdir included)
+tagged language: language:python
+filesize: size:>10000 (10kb)
+filename: filename:config
+
+extension: extension:py
+
+
+
+
+Advanced options:
+Location of the searched term: in:file/path
+From these owners: user:gwen001 or org:valvesoftware
+In these repositories: repo:pentest-tools
+Created on the dates: created:YYYY-MM-DD
+Written in this language: language:python
+
+Repositories options:
+With this many stars: stars:5
+With this many forks: forks:10
+Of this size: size:10 (kb)
+Pushed to: pushed:YYYY-MM-DD
+With this license: license:xxx
+Return repositories including fork:true/only
+
+Code options:
+With this extension: extension:py (no dot)
+Of this file size: size:100
+In this path: path:/foo/bar/baz/qux
+With this file name: filename:config.yml
+Return repositories including fork:true/only
+
+Issues options:
+In the state: state:closed/open
+With this many comments: comments:100
+With the labels: label:xxx
+Opened by the author: author:gwen001
+Mentioning the users: mentions:gwen001
+Assigned to the users: assignee:gwen001
+Updated before the date: updated:YYYY-MM-DD
+
+Users options:
+With this full name: fullname:"sarah connor"
+From this location: location:"los angeles"
+With this many followers: followers:100
+With this many public repositories: repos:10
+Working in this language: language:python
+
+Wiki options:
+Updated before the date: updated:YYYY-MM-DD
+
+
+
+=, >, <, >=, <=
+cats stars:>1000 or stars:1000..*
+cats topics:>=5
+cats size:<10000
+cats stars:<=50 or stars:*..50
+range: cats stars:10..50
+
+Works also with date:
+cats created:>2016-04-29 or created:2012-04-30..*
+cats created:>=2017-04-01
+cats pushed:<2012-07-05
+cats created:<=2012-07-04 or created:*..2012-04-30
+range: cats pushed:2016-04-30..2016-07-04
+
+Date + Time:
+cats created:2017-01-01T01:00:00+07:00..2017-03-01T15:30:15+07:00
+cats created:2016-03-21T14:11:00Z..2016-04-07T20:45:00Z
+
+Exclusion:
+string: hello NOT world
+qualifier: cats stars:>10 -language:javascript
+
+Use quotation marks for queries with whitespace
+cats NOT "hello world"
