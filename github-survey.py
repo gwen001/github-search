@@ -124,7 +124,7 @@ if 'slack_webhook' in t_config:
             old_value = int(t_old_values[key]['data'])
         if t_new_values[key]['data'] != old_value:
             n_confirm = githubApiSearchCode( key, True )
-            if type(n_confirm) is int and n_confirm != old_value:
+            if type(n_confirm) is int and n_confirm > old_value:
                 message = message + t_new_values[key]['title'] + ' : ' + str(old_value) + ' -> ' + str(t_new_values[key]['data']) + "\n" + t_new_values[key]['info'] + "\n\n"
 
 
