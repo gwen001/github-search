@@ -219,7 +219,7 @@ if( !count($t_tokens) ) {
 $l_token = count( $t_tokens ) - 1;
 // var_dump( $t_tokens );
 
-$t_exclude_extension = ['md','css','scss','sass','po',,'class','pyc','hqx'];
+$t_exclude_extension = ['md','css','scss','sass','po','class','pyc','hqx','rst'];
 // var_dump( $t_orguser );
 // var_dump( $t_dorks );
 
