@@ -18,8 +18,8 @@ if( !is_file($f_config) ) {
     exit( 'Config file not found!' );
 }
 $content = file_get_contents( $f_config );
-$t_json = json_decode( $content, true );
-// var_dump( $t_json );
+$t_config = json_decode( $content, true );
+// var_dump( $t_config );
 
 $t_blank_words = ['not'];
 
@@ -102,22 +102,22 @@ function doSearchGithub( $dork, $page )
     curl_close( $c );
     
     // var_dump( $r );
-    $t_json = json_decode( $r, true );
+    $t_config = json_decode( $r, true );
     
-    if( !isset($t_json['total_count']) ) {
+    if( !isset($t_config['total_count']) ) {
         return false;
     } else {
-        return $t_json;
+        return $t_config;
     }
 }
 
-function filterResults( $t_results, $t_dork )
+function filterResults( $t_results, $t_config, $dork, $t_filters )
 {
     $t_filtered = [];
 
-    foreach( $t_results['items'] as $results )
+    foreach( $t_results as $results )
     {
-        $r = isFiltered( $results, $t_dork );
+        $r = isFiltered( $results, $t_config, $dork, $t_filters );
 
         if( !$r ) {
             $t_filtered[] = $results;
@@ -127,19 +127,70 @@ function filterResults( $t_results, $t_dork )
     return $t_filtered;
 }
 
-function isFiltered( $result, $t_dork )
+function isFiltered( $result, $t_config, $dork, $t_filters )
 {
-    if( !isset($t_dork['exclude']) || !count($t_dork['exclude']) ) {
-        return false;
+    // exclude string in the content
+    if( in_array('content',$t_filters) )
+    {
+        if( isset($t_config['exclude']) && isset($t_config['exclude']['content']) ) {
+            $t_exclude = $t_config['exclude']['content'];
+        } else {
+            $t_exclude = [];
+        }
+        if( isset($t_config['github_dorks'][$dork]['exclude']) && isset($t_config['github_dorks'][$dork]['exclude']['content']) ) {
+            $t_exclude = array_merge( $t_exclude, $t_config['github_dorks'][$dork]['exclude']['content'] );
+        }
+
+        foreach( $t_exclude as $exclude ) {
+            $m = preg_match( '#('.$exclude.')#', $result['code'] );
+            if( $m ) {
+                return true;
+            }
+        }
     }
 
-    $full_path = $result['repository']['full_name'].'/'.$result['path'];
+    // exclude extension
+    if( in_array('extension',$t_filters) )
+    {
+        if( isset($t_config['exclude']) && isset($t_config['exclude']['extension']) ) {
+            $t_exclude = $t_config['exclude']['extension'];
+        } else {
+            $t_exclude = [];
+        }
+        if( isset($t_config['github_dorks'][$dork]['exclude']) && isset($t_config['github_dorks'][$dork]['exclude']['extension']) ) {
+            $t_exclude = array_merge( $t_exclude, $t_config['github_dorks'][$dork]['exclude']['extension'] );
+        }
 
-    foreach( $t_dork['exclude']['filepath'] as $exclude ) {
-        $p = strpos( $full_path, $exclude );
-        if( $p !== false && $p == 0 ) {
-            // echo "exlude: ".$full_path." -> ".$exclude."<br>\n";
-            return true;
+        $pos = strrpos( $result['path'], '.' );
+
+        if( $pos !== false ) {
+            $ext = substr( $result['path'], $pos+1 );
+            if( in_array($ext,$t_exclude) ) {
+                return true;
+            }
+       }
+    }
+
+    // exclude filepath
+    if( in_array('filepath',$t_filters) )
+    {
+        if( isset($t_config['exclude']) && isset($t_config['exclude']['filepath']) ) {
+            $t_exclude = $t_config['exclude']['filepath'];
+        } else {
+            $t_exclude = [];
+        }
+        if( isset($t_config['github_dorks'][$dork]['exclude']) && isset($t_config['github_dorks'][$dork]['exclude']['filepath']) ) {
+            $t_exclude = array_merge( $t_exclude, $t_config['github_dorks'][$dork]['exclude']['filepath'] );
+        }
+
+        $full_path = $result['repository']['full_name'].'/'.$result['path'];
+
+        foreach( $t_exclude as $exclude ) {
+            $p = strpos( $full_path, $exclude );
+            if( $p !== false && $p == 0 ) {
+                // echo "exlude: ".$full_path." -> ".$exclude."<br>\n";
+                return true;
+            }
         }
     }
 
@@ -161,12 +212,12 @@ function getCode( $url )
     curl_close( $c );
     
     // var_dump( $r );
-    $t_json = json_decode( $r, true );
+    $t_config = json_decode( $r, true );
     
-    if( !isset($t_json['sha']) ) {
+    if( !isset($t_config['sha']) ) {
         return false;
     } else {
-        return base64_decode( str_replace('\n','',$t_json['content']) );
+        return base64_decode( str_replace('\n','',$t_config['content']) );
     }
 }
 
@@ -185,12 +236,12 @@ function getCommitDate( $url )
     curl_close( $c );
     
     // var_dump( $r );
-    $t_json = json_decode( $r, true );
+    $t_config = json_decode( $r, true );
     
-    if( !isset($t_json['sha']) ) {
+    if( !isset($t_config['sha']) ) {
         return false;
     } else {
-        return $t_json['committer']['date'];
+        return $t_config['committer']['date'];
     }
 }
 
@@ -229,10 +280,10 @@ function getCommitDates( &$t_filtered )
         $r = curl_multi_getcontent( $result['curl'] );
 
         // var_dump( $r );
-        $t_json = json_decode( $r, true );
+        $t_config = json_decode( $r, true );
 
-        if( isset($t_json['sha']) ) {
-            $result['commit_date'] = new DateTime( $t_json['committer']['date'] );
+        if( isset($t_config['sha']) ) {
+            $result['commit_date'] = new DateTime( $t_config['committer']['date'] );
             $now = new DateTime();
             $date_diff = date_diff( $result['commit_date'], $now );
             $result['commit_date_diff'] = diff2str( $date_diff );
@@ -272,10 +323,10 @@ function getCodes( &$t_filtered )
         $r = curl_multi_getcontent( $result['curl'] );
 
         // var_dump( $r );
-        $t_json = json_decode( $r, true );
+        $t_config = json_decode( $r, true );
 
-        if( isset($t_json['sha']) ) {
-            $result['code'] = base64_decode( str_replace('\n','',$t_json['content']) );
+        if( isset($t_config['sha']) ) {
+            $result['code'] = base64_decode( str_replace('\n','',$t_config['content']) );
         }
     }
 }
@@ -296,7 +347,7 @@ if( isset($_GET['d']) )
         if( !$n_results ) {
             break;
         }
-        $t_filtered = filterResults( $t_results, $t_json['github_dorks'][$_GET['d']] );
+        $t_filtered = filterResults( $t_results['items'], $t_config, $_GET['d'], ['filepath','extension'] );
         $n_desired += count( $t_filtered );
         $page++;
     }
@@ -308,23 +359,26 @@ if( isset($_GET['d']) )
 
     getCodes( $t_filtered );
     getCommitDates( $t_filtered );
+
+    // yes yes again ! (content filtering)
+    $t_filtered = filterResults( $t_filtered, $t_config, $_GET['d'], ['content'] );
 }
 
 if( isset($_GET['a']) && $_GET['a'] == 'exclude' )
 {
-    if( isset($_POST['d']) )
+    if( isset($_POST['d']) && isset($_POST['t']) )
     {
-        if( !isset($t_json['github_dorks'][ $_POST['d'] ]['exclude']) ) {
-            $t_json['github_dorks'][ $_POST['d'] ]['exclude'] = [
+        if( !isset($t_config['github_dorks'][ $_POST['d'] ]['exclude']) ) {
+            $t_config['github_dorks'][ $_POST['d'] ]['exclude'] = [
                 'filepath' => [],
                 'content' => [],
                 'extension' => [],
             ];
         }
 
-        $t_json['github_dorks'][ $_POST['d'] ]['exclude']['filepath'][] = $_POST['e'];
+        $t_config['github_dorks'][ $_POST['d'] ]['exclude'][$_POST['t']][] = $_POST['e'];
 
-        file_put_contents( $f_config, json_encode($t_json,JSON_PRETTY_PRINT) );
+        file_put_contents( $f_config, json_encode($t_config,JSON_PRETTY_PRINT) );
     }
 
     exit();
@@ -400,7 +454,7 @@ if( isset($_GET['a']) && $_GET['a'] == 'exclude' )
         <div class="container-fluid">
             <div class="row">
                 <div class="col-md-2 list-group">
-                    <?php foreach( $t_json['github_dorks'] as $dork=>$datas ) { ?>
+                    <?php foreach( $t_config['github_dorks'] as $dork=>$datas ) { ?>
                         <a href="?d=<?php echo __urlencode($dork); ?>" class="list-group-item list-group-item-action"><?php echo $dork; ?></a>
                     <?php } ?>
                 </div>
@@ -409,9 +463,11 @@ if( isset($_GET['a']) && $_GET['a'] == 'exclude' )
                     <?php foreach( $t_filtered as $result ) { ?>
                         <div class="result" data-full-path="<?php echo $result['repository']['full_name'].'/'.$result['path']; ?>">
                             <div class="result_action">
-                                <a href="javascript:excludeResult('<?php echo $result['repository']['full_name'].'/'.$result['path']; ?>');" title="exclude file"><img src="img/page_delete.png" title="exclude file" /></a>
-                                <a href="javascript:excludeResult('<?php echo $result['repository']['full_name']; ?>');" title="exclude repository"><img src="img/folder_delete.png" title="exclude repository" /></a>
-                                <a href="javascript:excludeResult('<?php echo $result['repository']['owner']['login']; ?>');" title="exclude user"><img src="img/user_delete.png" title="exclude user" /></a>
+                                <input type="text" name="exclude_string" placeholder="exclude results with string..." />
+                                <input type="submit" name="btn_exclude_string" class="btn-exclude-string" value="EX" />
+                                <a href="javascript:excludeFilepath('<?php echo $result['repository']['full_name'].'/'.$result['path']; ?>');" title="exclude file"><img src="img/page_delete.png" title="exclude file" /></a>
+                                <a href="javascript:excludeFilepath('<?php echo $result['repository']['full_name']; ?>');" title="exclude repository"><img src="img/folder_delete.png" title="exclude repository" /></a>
+                                <a href="javascript:excludeFilepath('<?php echo $result['repository']['owner']['login']; ?>');" title="exclude user"><img src="img/user_delete.png" title="exclude user" /></a>
                             </div>
                             <div class="result_profile_picture"><a href="<?php echo $result['repository']['owner']['html_url']; ?>" target="_blank"><img src="<?php echo $result['repository']['owner']['avatar_url']; ?>&s=40" width="40" /></a></div>
                             <div class="result_repository_full_name"><a href="<?php echo $result['repository']['html_url']; ?>" target="_blank"><?php echo $result['repository']['full_name']; ?></a></div>
@@ -438,8 +494,8 @@ if( isset($_GET['a']) && $_GET['a'] == 'exclude' )
                 <?php if( isset($_GET['d']) ) { ?>
                 <div class="col-md-3">
                     <a href="https://github.com/search?o=desc&s=indexed&type=Code&q=<?php echo __urlencode($_GET['d']); ?>" target="_blank">https://github.com/search?o=desc&s=indexed&type=Code&q=<?php echo __urlencode($_GET['d']); ?></a>
-                    <?php if( isset($t_json['github_dorks'][ $_GET['d'] ]['exclude']) ) { ?>
-                        <pre><?php var_dump( $t_json['github_dorks'][ $_GET['d'] ]['exclude'] ); ?></pre>
+                    <?php if( isset($t_config['github_dorks'][ $_GET['d'] ]['exclude']) ) { ?>
+                        <pre><?php var_dump( $t_config['github_dorks'][ $_GET['d'] ]['exclude'] ); ?></pre>
                     <?php } ?>
                 </div>
                 <?php } ?>
@@ -453,11 +509,17 @@ if( isset($_GET['a']) && $_GET['a'] == 'exclude' )
                     p = c.position().top - 47;
                     $(this).scrollTop( p );
                 });
+                $('.btn-exclude-string').click(function(){
+                    v = $(this).parent().find('input[name="exclude_string"]').val();
+                    if( v.length ) {
+                        excludeString( v );
+                    }
+                });
             });
 
-            function excludeResult( result )
+            function doExclude( exclude, type )
             {
-                datas = 'd=' + getQueryParam('d') + '&e=' + result;
+                datas = 'd=' + getQueryParam('d') + '&e=' + exclude + '&t=' + type;
 
                 $.ajax({
                     type: 'POST',
@@ -468,8 +530,25 @@ if( isset($_GET['a']) && $_GET['a'] == 'exclude' )
                         ;
                     }
                 });
+            }
 
-                $('.result[data-full-path^="'+result+'"]').hide();
+            function excludeString( exclude )
+            {
+                doExclude( exclude, 'content' );
+
+                $('.result_code').each(function(){
+                    code = $(this).text();
+                    if( code.indexOf(exclude) >= 0 ) {
+                        $(this).parent('.result').hide();
+                    }
+                });
+            }
+
+            function excludeFilepath( exclude )
+            {
+                doExclude( exclude, 'filepath' );
+
+                $('.result[data-full-path^="'+exclude+'"]').hide();
             }
 
             function getQueryParam(param) {
