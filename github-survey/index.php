@@ -3,6 +3,9 @@
 define( 'N_RESULTS_DESIRED', 10 );
 
 $f_tokens = dirname(__FILE__) . '/.tokens';
+if( !is_file($f_tokens) ) {
+    exit( 'Tokens file not found!' );
+}
 $content = file_get_contents( $f_tokens );
 $m = preg_match_all( '([a-f0-9]{40})', $content, $matches );
 if( $m ) {
@@ -11,6 +14,9 @@ if( $m ) {
 // var_dump( $t_tokens );
 
 $f_config = dirname(__FILE__) . '/github-survey.json';
+if( !is_file($f_config) ) {
+    exit( 'Config file not found!' );
+}
 $content = file_get_contents( $f_config );
 $t_json = json_decode( $content, true );
 // var_dump( $t_json );
@@ -373,9 +379,6 @@ if( isset($_GET['a']) && $_GET['a'] == 'exclude' )
                 float: left;
                 margin-right: 10px;
             }
-            .result_profile_picture img {
-                width: 40px;
-            }
             .result_action {
                 float: right;
             }
@@ -410,7 +413,7 @@ if( isset($_GET['a']) && $_GET['a'] == 'exclude' )
                                 <a href="javascript:excludeResult('<?php echo $result['repository']['full_name']; ?>');" title="exclude repository"><img src="img/folder_delete.png" title="exclude repository" /></a>
                                 <a href="javascript:excludeResult('<?php echo $result['repository']['owner']['login']; ?>');" title="exclude user"><img src="img/user_delete.png" title="exclude user" /></a>
                             </div>
-                            <div class="result_profile_picture"><a href="<?php echo $result['repository']['owner']['html_url']; ?>" target="_blank"><img src="<?php echo $result['repository']['owner']['avatar_url']; ?>&s=40" /></a></div>
+                            <div class="result_profile_picture"><a href="<?php echo $result['repository']['owner']['html_url']; ?>" target="_blank"><img src="<?php echo $result['repository']['owner']['avatar_url']; ?>&s=40" width="40" /></a></div>
                             <div class="result_repository_full_name"><a href="<?php echo $result['repository']['html_url']; ?>" target="_blank"><?php echo $result['repository']['full_name']; ?></a></div>
                             <div class="result_path">
                                 <a href="<?php echo $result['html_url']; ?>" target="_blank"><?php echo $result['path']; ?></a>
