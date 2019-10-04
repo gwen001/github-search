@@ -93,7 +93,7 @@ function doSearchGithub( $dork, $page )
     $token = $t_tokens[ rand(0,count($t_tokens)-1) ];
     $t_headers = [ 'Authorization: token '.$token, 'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.101 Safari/537.36' ];
     $url = 'https://api.github.com/search/code?sort=indexed&order=desc&page=' . $page . '&q=' . __urlencode($dork);
-    echo $url."<br>\n";
+    // echo $url."<br>\n";
 
     $c = curl_init();
     curl_setopt( $c, CURLOPT_URL, $url );
@@ -349,13 +349,13 @@ if( isset($_GET['d']) )
             break;
         }
         $t_filtered = filterResults( $t_results['items'], $t_config, $_GET['d'], ['filepath','extension'] );
-        $n_desired += count( $t_filtered );
 
         getCodes( $t_filtered );
         getCommitDates( $t_filtered );
-    
+
         // yes yes again ! (content filtering)
         $t_filtered = filterResults( $t_filtered, $t_config, $_GET['d'], ['content'] );
+        $n_desired += count( $t_filtered );
         $page++;
 
         if( $page >= MAX_PAGE ) {
@@ -468,7 +468,7 @@ if( isset($_GET['a']) && $_GET['a'] == 'exclude' )
                     <?php foreach( $t_filtered as $result ) { ?>
                         <div class="result" data-full-path="<?php echo $result['repository']['full_name'].'/'.$result['path']; ?>">
                             <div class="result_action">
-                                <input type="text" name="exclude_string" placeholder="exclude results with string..." />
+                                <input type="text" size="10" name="exclude_string" placeholder="exclude results with string..." />
                                 <input type="submit" name="btn_exclude_string" class="btn-exclude-string" value="EX" />
                                 <a href="javascript:excludeFilepath('<?php echo $result['repository']['full_name'].'/'.$result['path']; ?>');" title="exclude file"><img src="img/page_delete.png" title="exclude file" /></a>
                                 <a href="javascript:excludeFilepath('<?php echo $result['repository']['full_name']; ?>');" title="exclude repository"><img src="img/folder_delete.png" title="exclude repository" /></a>
