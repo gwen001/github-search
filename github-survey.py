@@ -119,7 +119,7 @@ if 'slack_webhook' in t_config:
 
     for key in t_new_values:
         if not type(t_old_values) is dict or not key in t_old_values or not type(t_old_values[key]) is dict or not 'data' in t_old_values[key]:
-            old_value = 0
+            old_value = -1
         else:
             old_value = int(t_old_values[key]['data'])
         if t_new_values[key]['data'] != old_value:
