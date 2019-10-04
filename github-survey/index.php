@@ -405,7 +405,7 @@ if( isset($_GET['a']) && $_GET['a'] == 'exclude' )
                     <?php } ?>
                 </div>
                 <?php if( isset($t_filtered) && count($t_filtered) ) { ?>
-                <div class="col-md-10">
+                <div class="col-md-7">
                     <?php foreach( $t_filtered as $result ) { ?>
                         <div class="result" data-full-path="<?php echo $result['repository']['full_name'].'/'.$result['path']; ?>">
                             <div class="result_action">
@@ -432,6 +432,14 @@ if( isset($_GET['a']) && $_GET['a'] == 'exclude' )
                                 </div>
                             <?php } ?>
                         </div>
+                    <?php } ?>
+                </div>
+                <?php } ?>
+                <?php if( isset($_GET['d']) ) { ?>
+                <div class="col-md-3">
+                    <a href="https://github.com/search?o=desc&s=indexed&type=Code&q=<?php echo __urlencode($_GET['d']); ?>" target="_blank">https://github.com/search?o=desc&s=indexed&type=Code&q=<?php echo __urlencode($_GET['d']); ?></a>
+                    <?php if( isset($t_json['github_dorks'][ $_GET['d'] ]['exclude']) ) { ?>
+                        <pre><?php var_dump( $t_json['github_dorks'][ $_GET['d'] ]['exclude'] ); ?></pre>
                     <?php } ?>
                 </div>
                 <?php } ?>
