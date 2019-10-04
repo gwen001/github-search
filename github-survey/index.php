@@ -1,6 +1,7 @@
 <?php
 
 define( 'N_RESULTS_DESIRED', 10 );
+define( 'MAX_PAGE', 5 );
 
 $f_tokens = dirname(__FILE__) . '/.tokens';
 if( !is_file($f_tokens) ) {
@@ -92,7 +93,7 @@ function doSearchGithub( $dork, $page )
     $token = $t_tokens[ rand(0,count($t_tokens)-1) ];
     $t_headers = [ 'Authorization: token '.$token, 'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.101 Safari/537.36' ];
     $url = 'https://api.github.com/search/code?sort=indexed&order=desc&page=' . $page . '&q=' . __urlencode($dork);
-    // echo $url."<br>\n";
+    echo $url."<br>\n";
 
     $c = curl_init();
     curl_setopt( $c, CURLOPT_URL, $url );
@@ -349,19 +350,23 @@ if( isset($_GET['d']) )
         }
         $t_filtered = filterResults( $t_results['items'], $t_config, $_GET['d'], ['filepath','extension'] );
         $n_desired += count( $t_filtered );
+
+        getCodes( $t_filtered );
+        getCommitDates( $t_filtered );
+    
+        // yes yes again ! (content filtering)
+        $t_filtered = filterResults( $t_filtered, $t_config, $_GET['d'], ['content'] );
         $page++;
+
+        if( $page >= MAX_PAGE ) {
+            break;
+        }
     }
     while( $n_desired < N_RESULTS_DESIRED );
 
     if( count($t_filtered) > N_RESULTS_DESIRED ) {
         $t_filtered = array_slice( $t_filtered, 0, N_RESULTS_DESIRED );
     }
-
-    getCodes( $t_filtered );
-    getCommitDates( $t_filtered );
-
-    // yes yes again ! (content filtering)
-    $t_filtered = filterResults( $t_filtered, $t_config, $_GET['d'], ['content'] );
 }
 
 if( isset($_GET['a']) && $_GET['a'] == 'exclude' )
