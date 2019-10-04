@@ -10,7 +10,7 @@ if( $m ) {
 }
 // var_dump( $t_tokens );
 
-$f_config = '/home/gwen/.config/github-survey.json';
+$f_config = dirname(__FILE__) . '/github-survey.json';
 $content = file_get_contents( $f_config );
 $t_json = json_decode( $content, true );
 // var_dump( $t_json );
