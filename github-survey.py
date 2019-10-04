@@ -96,7 +96,7 @@ if 'github_dorks' in t_config:
             t_new_values[dork]['info'] = 'https://github.com/search?o=desc&s=indexed&type=Code&q=' + urllib.parse.quote(dork)
             t_new_values[dork]['data'] = result['total_count']
 
-            if 'exclude' in t_old_values[dork]:
+            if type(t_old_values[dork]) is dict and 'exclude' in t_old_values[dork]:
                 t_new_values[dork]['exclude'] = t_old_values[dork]['exclude']
 
 
