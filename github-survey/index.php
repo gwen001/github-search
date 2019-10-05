@@ -357,7 +357,7 @@ if( isset($_GET['d']) )
             break;
         }
         $t_filtered = filterResults( $t_results['items'], $t_exclude, ['filepath','extension'] );
-        break;
+        // break;
 
         getCodes( $t_filtered );
         getCommitDates( $t_filtered );
