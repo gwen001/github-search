@@ -112,13 +112,13 @@ function doSearchGithub( $dork, $page )
     }
 }
 
-function filterResults( $t_results, $t_config, $dork, $t_filters )
+function filterResults( $t_results, $t_exclude, $t_filters )
 {
     $t_filtered = [];
 
     foreach( $t_results as $results )
     {
-        $r = isFiltered( $results, $t_config, $dork, $t_filters );
+        $r = isFiltered( $results, $t_exclude, $t_filters );
 
         if( !$r ) {
             $t_filtered[] = $results;
@@ -128,21 +128,46 @@ function filterResults( $t_results, $t_config, $dork, $t_filters )
     return $t_filtered;
 }
 
-function isFiltered( $result, $t_config, $dork, $t_filters )
+function excludeFusion( $t_config, $dork )
+{
+    $t_exclude = [];
+
+    if( isset($t_config['exclude']) && isset($t_config['exclude']['content']) ) {
+        $t_exclude['content'] = $t_config['exclude']['content'];
+    } else {
+        $t_exclude['content'] = [];
+    }
+    if( isset($t_config['github_dorks'][$dork]['exclude']) && isset($t_config['github_dorks'][$dork]['exclude']['content']) ) {
+        $t_exclude['content'] = array_merge( $t_exclude['content'], $t_config['github_dorks'][$dork]['exclude']['content'] );
+    }
+
+    if( isset($t_config['exclude']) && isset($t_config['exclude']['extension']) ) {
+        $t_exclude['extension'] = $t_config['exclude']['extension'];
+    } else {
+        $t_exclude['extension'] = [];
+    }
+    if( isset($t_config['github_dorks'][$dork]['exclude']) && isset($t_config['github_dorks'][$dork]['exclude']['extension']) ) {
+        $t_exclude['extension'] = array_merge( $t_exclude['extension'], $t_config['github_dorks'][$dork]['exclude']['extension'] );
+    }
+
+    if( isset($t_config['exclude']) && isset($t_config['exclude']['filepath']) ) {
+        $t_exclude['filepath'] = $t_config['exclude']['filepath'];
+    } else {
+        $t_exclude['filepath'] = [];
+    }
+    if( isset($t_config['github_dorks'][$dork]['exclude']) && isset($t_config['github_dorks'][$dork]['exclude']['filepath']) ) {
+        $t_exclude['filepath'] = array_merge( $t_exclude['filepath'], $t_config['github_dorks'][$dork]['exclude']['filepath'] );
+    }
+
+    return $t_exclude;
+}
+
+function isFiltered( $result, $t_exclude, $t_filters )
 {
     // exclude string in the content
     if( in_array('content',$t_filters) )
     {
-        if( isset($t_config['exclude']) && isset($t_config['exclude']['content']) ) {
-            $t_exclude = $t_config['exclude']['content'];
-        } else {
-            $t_exclude = [];
-        }
-        if( isset($t_config['github_dorks'][$dork]['exclude']) && isset($t_config['github_dorks'][$dork]['exclude']['content']) ) {
-            $t_exclude = array_merge( $t_exclude, $t_config['github_dorks'][$dork]['exclude']['content'] );
-        }
-
-        foreach( $t_exclude as $exclude ) {
+        foreach( $t_exclude['content'] as $exclude ) {
             $m = preg_match( '#('.$exclude.')#', $result['code'] );
             if( $m ) {
                 return true;
@@ -153,20 +178,11 @@ function isFiltered( $result, $t_config, $dork, $t_filters )
     // exclude extension
     if( in_array('extension',$t_filters) )
     {
-        if( isset($t_config['exclude']) && isset($t_config['exclude']['extension']) ) {
-            $t_exclude = $t_config['exclude']['extension'];
-        } else {
-            $t_exclude = [];
-        }
-        if( isset($t_config['github_dorks'][$dork]['exclude']) && isset($t_config['github_dorks'][$dork]['exclude']['extension']) ) {
-            $t_exclude = array_merge( $t_exclude, $t_config['github_dorks'][$dork]['exclude']['extension'] );
-        }
-
         $pos = strrpos( $result['path'], '.' );
 
         if( $pos !== false ) {
             $ext = substr( $result['path'], $pos+1 );
-            if( in_array($ext,$t_exclude) ) {
+            if( in_array($ext,$t_exclude['extension']) ) {
                 return true;
             }
        }
@@ -175,18 +191,9 @@ function isFiltered( $result, $t_config, $dork, $t_filters )
     // exclude filepath
     if( in_array('filepath',$t_filters) )
     {
-        if( isset($t_config['exclude']) && isset($t_config['exclude']['filepath']) ) {
-            $t_exclude = $t_config['exclude']['filepath'];
-        } else {
-            $t_exclude = [];
-        }
-        if( isset($t_config['github_dorks'][$dork]['exclude']) && isset($t_config['github_dorks'][$dork]['exclude']['filepath']) ) {
-            $t_exclude = array_merge( $t_exclude, $t_config['github_dorks'][$dork]['exclude']['filepath'] );
-        }
-
         $full_path = $result['repository']['full_name'].'/'.$result['path'];
 
-        foreach( $t_exclude as $exclude ) {
+        foreach( $t_exclude['filepath'] as $exclude ) {
             $p = strpos( $full_path, $exclude );
             if( $p !== false && $p == 0 ) {
                 // echo "exlude: ".$full_path." -> ".$exclude."<br>\n";
@@ -337,6 +344,7 @@ if( isset($_GET['d']) )
 {
     $n_desired = 0;
     $page = 0;
+    $t_exclude = excludeFusion( $t_config, $_GET['d'] );
 
     do
     {
@@ -348,13 +356,14 @@ if( isset($_GET['d']) )
         if( !$n_results ) {
             break;
         }
-        $t_filtered = filterResults( $t_results['items'], $t_config, $_GET['d'], ['filepath','extension'] );
+        $t_filtered = filterResults( $t_results['items'], $t_exclude, ['filepath','extension'] );
+        break;
 
         getCodes( $t_filtered );
         getCommitDates( $t_filtered );
 
         // yes yes again ! (content filtering)
-        $t_filtered = filterResults( $t_filtered, $t_config, $_GET['d'], ['content'] );
+        $t_filtered = filterResults( $t_filtered, $t_exclude, ['content'] );
         $n_desired += count( $t_filtered );
         $page++;
 
@@ -382,8 +391,12 @@ if( isset($_GET['a']) && $_GET['a'] == 'exclude' )
         }
 
         $t_config['github_dorks'][ $_POST['d'] ]['exclude'][$_POST['t']][] = $_POST['e'];
+        $t_exclude = excludeFusion( $t_config, $_POST['d'] );
 
         file_put_contents( $f_config, json_encode($t_config,JSON_PRETTY_PRINT) );
+
+        header( 'Content-Type: application/json' );
+        echo json_encode( $t_exclude );
     }
 
     exit();
@@ -498,10 +511,14 @@ if( isset($_GET['a']) && $_GET['a'] == 'exclude' )
                 <?php } ?>
                 <?php if( isset($_GET['d']) ) { ?>
                 <div class="col-md-3">
-                    <a href="https://github.com/search?o=desc&s=indexed&type=Code&q=<?php echo __urlencode($_GET['d']); ?>" target="_blank">https://github.com/search?o=desc&s=indexed&type=Code&q=<?php echo __urlencode($_GET['d']); ?></a>
-                    <?php if( isset($t_config['github_dorks'][ $_GET['d'] ]['exclude']) ) { ?>
-                        <pre><?php var_dump( $t_config['github_dorks'][ $_GET['d'] ]['exclude'] ); ?></pre>
-                    <?php } ?>
+                    <div class="github_search_link">
+                        <a href="https://github.com/search?o=desc&s=indexed&type=Code&q=<?php echo __urlencode($_GET['d']); ?>" target="_blank">https://github.com/search?o=desc&s=indexed&type=Code&q=<?php echo __urlencode($_GET['d']); ?></a>
+                    </div>
+                    <div>
+                        <?php if( isset($t_config['github_dorks'][ $_GET['d'] ]['exclude']) ) { ?>
+                            <pre class="exclude_list"><?php echo json_encode( $t_exclude, JSON_PRETTY_PRINT ); ?></pre>
+                        <?php } ?>
+                    </div>
                 </div>
                 <?php } ?>
             </div>
@@ -531,14 +548,25 @@ if( isset($_GET['a']) && $_GET['a'] == 'exclude' )
                     url: '?a=exclude',
                     data: datas,
                     dataType: 'json',
-                    success: function(){
-                        ;
+                    success: function(response){
+                        $('.exclude_list').text( JSON.stringify(response,null,4) );
                     }
                 });
             }
 
+            function excludeExtension( exclude )
+            {
+                ext = exclude.substring(2);
+                doExclude( ext, 'extension' );
+            }
+
             function excludeString( exclude )
             {
+                if( exclude.substring(0,2) == '*.' ) {
+                    excludeExtension( exclude );
+                    return;
+                }
+
                 doExclude( exclude, 'content' );
 
                 $('.result_code').each(function(){
