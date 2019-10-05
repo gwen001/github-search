@@ -515,9 +515,7 @@ if( isset($_GET['a']) && $_GET['a'] == 'exclude' )
                         <a href="https://github.com/search?o=desc&s=indexed&type=Code&q=<?php echo __urlencode($_GET['d']); ?>" target="_blank">https://github.com/search?o=desc&s=indexed&type=Code&q=<?php echo __urlencode($_GET['d']); ?></a>
                     </div>
                     <div>
-                        <?php if( isset($t_config['github_dorks'][ $_GET['d'] ]['exclude']) ) { ?>
-                            <pre class="exclude_list"><?php echo json_encode( $t_exclude, JSON_PRETTY_PRINT ); ?></pre>
-                        <?php } ?>
+                        <pre class="exclude_list"><?php echo json_encode( $t_exclude, JSON_PRETTY_PRINT ); ?></pre>
                     </div>
                 </div>
                 <?php } ?>
