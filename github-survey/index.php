@@ -525,9 +525,11 @@ if( isset($_GET['a']) && $_GET['a'] == 'exclude' )
         <script type="text/javascript">
             $(document).ready(function() {
                 $('.result_code').each(function(){
-                    c = $(this).find('.result_code_highlight').first();
-                    p = c.position().top - 47;
-                    $(this).scrollTop( p );
+                    c = $(this).find('.result_code_highlight');
+                    if( c.length ) {
+                        p = c.first().position().top - 47;
+                        $(this).scrollTop( p );
+                    }
                 });
                 $('.btn-exclude-string').click(function(){
                     v = $(this).parent().find('input[name="exclude_string"]').val();
