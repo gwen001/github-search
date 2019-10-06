@@ -28,6 +28,14 @@ $t_config = json_decode( $content, true );
 
 $t_blank_words = ['not'];
 
+function getRawUrl( $result )
+{
+    $raw_url = $result['html_url'];
+    $raw_url = str_replace( 'https://github.com/', 'https://raw.githubusercontent.com/', $raw_url );
+    $raw_url = str_replace( '/blob/', '/', $raw_url );
+    return $raw_url;
+}
+
 function highlightCode( $content )
 {
     global $t_blank_words;
@@ -498,7 +506,7 @@ if( isset($_GET['a']) && $_GET['a'] == 'exclude' )
                             <div class="result_profile_picture"><a href="<?php echo $result['repository']['owner']['html_url']; ?>" target="_blank"><img src="<?php echo $result['repository']['owner']['avatar_url']; ?>&s=40" width="40" /></a></div>
                             <div class="result_repository_full_name"><a href="<?php echo $result['repository']['html_url']; ?>" target="_blank"><?php echo $result['repository']['full_name']; ?></a></div>
                             <div class="result_path">
-                                <a href="<?php echo $result['html_url']; ?>" target="_blank"><?php echo $result['path']; ?></a>
+                                <a href="<?php echo getRawUrl($result); ?>" target="_blank"><?php echo $result['path']; ?></a>
                                 <?php if( isset($result['code']) ) { ?>
                                     <span class="result_size">(<?php echo format_bytes(strlen($result['code'])); ?>)</span>
                                 <?php } ?>
