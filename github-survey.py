@@ -103,6 +103,7 @@ if 'github_dorks' in t_config:
 
 
     # t_config['github_dorks'] = collections.OrderedDict( sorted(t_new_values.items()) )
+    t_config['github_dorks'] = collections.OrderedDict( sorted(t_config['github_dorks'].items()) )
 
 
 
