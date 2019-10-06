@@ -351,12 +351,12 @@ function getCodes( &$t_filtered )
 if( isset($_GET['d']) )
 {
     $n_desired = 0;
-    $page = 0;
+    $current_page = 0;
     $t_exclude = excludeFusion( $t_config, $_GET['d'] );
 
     do
     {
-        $t_results = doSearchGithub( $_GET['d'], $page );
+        $t_results = doSearchGithub( $_GET['d'], $current_page );
         if( $t_results === false ) {
             break;
         }
@@ -373,9 +373,9 @@ if( isset($_GET['d']) )
         // yes yes again ! (content filtering)
         $t_filtered = filterResults( $t_filtered, $t_exclude, ['content'] );
         $n_desired += count( $t_filtered );
-        $page++;
+        $current_page++;
 
-        if( $page >= MAX_PAGE ) {
+        if( $current_page >= MAX_PAGE ) {
             break;
         }
     }
@@ -521,6 +521,7 @@ if( isset($_GET['a']) && $_GET['a'] == 'exclude' )
                 <div class="col-md-3">
                     <div class="github_search_link">
                         <a href="https://github.com/search?o=desc&s=indexed&type=Code&q=<?php echo __urlencode($_GET['d']); ?>" target="_blank">https://github.com/search?o=desc&s=indexed&type=Code&q=<?php echo __urlencode($_GET['d']); ?></a>
+                        (page <?php echo ($current_page-1); ?>)
                     </div>
                     <div>
                         <pre class="exclude_list"><?php echo json_encode( $t_exclude, JSON_PRETTY_PRINT ); ?></pre>
