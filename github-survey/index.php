@@ -37,12 +37,16 @@ function highlightCode( $content )
     $s_chars = ['"',"'"];
     $r_chars = [''];
 
-    foreach( $t_words as $word ) {
+    foreach( $t_words as $k=>$word ) {
         if( in_array(strtolower($word),$t_blank_words) ) {
             continue;
         }
         $word = str_replace( $s_chars, $r_chars, $word );
-        $content = preg_replace( '#('.$word.')#i', "<span class=\"result_code_highlight\">$1</span>", $content );
+        $class = 'result_code_highlight';
+        if( $k == 0 ) {
+            $class .= ' first_word_match';
+        }
+        $content = preg_replace( '#('.$word.')#i', "<span class=\"".$class."\">$1</span>", $content );
     }
 
     // $content = nl2br( $content );
@@ -529,10 +533,16 @@ if( isset($_GET['a']) && $_GET['a'] == 'exclude' )
         <script type="text/javascript">
             $(document).ready(function() {
                 $('.result_code').each(function(){
-                    c = $(this).find('.result_code_highlight');
+                    c = $(this).find('.first_word_match');
                     if( c.length ) {
                         p = c.first().position().top - 47;
                         $(this).scrollTop( p );
+                    } else {
+                        c = $(this).find('.result_code_highlight');
+                        if( c.length ) {
+                            p = c.first().position().top - 47;
+                            $(this).scrollTop( p );
+                        }
                     }
                 });
                 $('.btn-exclude-string').click(function(){
