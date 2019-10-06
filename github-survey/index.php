@@ -5,7 +5,7 @@ ini_set( 'display_errors', true );
 ini_set( 'display_startup_errors', true );
 
 define( 'N_RESULTS_DESIRED', 10 );
-define( 'MAX_PAGE', 5 );
+define( 'MAX_PAGE', 10 );
 
 $f_tokens = dirname(__FILE__) . '/.tokens';
 if( !is_file($f_tokens) ) {
