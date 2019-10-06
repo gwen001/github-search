@@ -398,15 +398,25 @@ if( isset($_GET['a']) && $_GET['a'] == 'exclude' )
 {
     if( isset($_POST['d']) && isset($_POST['t']) )
     {
-        if( !isset($t_config['github_dorks'][ $_POST['d'] ]['exclude']) ) {
-            $t_config['github_dorks'][ $_POST['d'] ]['exclude'] = [
+        // if( !isset($t_config['github_dorks'][ $_POST['d'] ]['exclude']) ) {
+        //     $t_config['github_dorks'][ $_POST['d'] ]['exclude'] = [
+        //         'filepath' => [],
+        //         'content' => [],
+        //         'extension' => [],
+        //     ];
+        // }
+
+        // $t_config['github_dorks'][ $_POST['d'] ]['exclude'][$_POST['t']][] = $_POST['e'];
+
+        if( !isset($t_config['exclude']) ) {
+            $t_config['exclude'] = [
                 'filepath' => [],
                 'content' => [],
                 'extension' => [],
             ];
         }
 
-        $t_config['github_dorks'][ $_POST['d'] ]['exclude'][$_POST['t']][] = $_POST['e'];
+        $t_config['exclude'][$_POST['t']][] = $_POST['e'];
         $t_exclude = excludeFusion( $t_config, $_POST['d'] );
 
         file_put_contents( $f_config, json_encode($t_config,JSON_PRETTY_PRINT) );

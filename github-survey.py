@@ -31,11 +31,12 @@ if not 'n_multiproc' in t_config:
     t_config['n_multiproc'] = 10
 
 if 'github_dorks' in t_config:
-    t_old_values = t_config['github_dorks']
+    t_old_values = t_config['github_dorks'].copy()
 else:
-    t_old_values = {}
+    sys.stdout.write( "%s[-] error occurred: no dorks configured%s\n" % (fg('red'),attr(0)) )
+    exit()
 
-t_new_values = {}
+# t_new_values = t_old_values.copy()
 
 
 
@@ -91,16 +92,17 @@ if 'github_dorks' in t_config:
 
     for dork,result in t_results.items():
         if type(result) is dict:
-            t_new_values[dork] = {}
-            t_new_values[dork]['title'] = 'github search code \'' + dork + '\''
-            t_new_values[dork]['info'] = 'https://github.com/search?o=desc&s=indexed&type=Code&q=' + urllib.parse.quote(dork)
-            t_new_values[dork]['data'] = result['total_count']
+            t_config['github_dorks'][dork]['data'] = result['total_count']
+            # t_new_values[dork] = {}
+            # t_new_values[dork]['title'] = 'github search code \'' + dork + '\''
+            # t_new_values[dork]['info'] = 'https://github.com/search?o=desc&s=indexed&type=Code&q=' + urllib.parse.quote(dork)
+            # t_new_values[dork]['data'] = result['total_count']
 
-            if type(t_old_values[dork]) is dict and 'exclude' in t_old_values[dork]:
-                t_new_values[dork]['exclude'] = t_old_values[dork]['exclude']
+            # if type(t_old_values[dork]) is dict and 'exclude' in t_old_values[dork]:
+            #     t_new_values[dork]['exclude'] = t_old_values[dork]['exclude']
 
 
-    t_config['github_dorks'] = collections.OrderedDict( sorted(t_new_values.items()) )
+    # t_config['github_dorks'] = collections.OrderedDict( sorted(t_new_values.items()) )
 
 
 
@@ -120,15 +122,25 @@ def sendSlackNotif( slack_webhook, message ):
 if 'slack_webhook' in t_config:
     message = ''
 
-    for key in t_new_values:
-        if not type(t_old_values) is dict or not key in t_old_values or not type(t_old_values[key]) is dict or not 'data' in t_old_values[key]:
+    for dork in t_config['github_dorks']:
+        if not type(t_old_values) is dict or not dork in t_old_values or not type(t_old_values[dork]) is dict or not 'data' in t_old_values[dork]:
             old_value = -1
         else:
-            old_value = int(t_old_values[key]['data'])
-        if t_new_values[key]['data'] != old_value:
-            n_confirm = githubApiSearchCode( key, True )
+            old_value = int(t_old_values[dork]['data'])
+        if t_config['github_dorks'][dork]['data'] != old_value:
+            n_confirm = githubApiSearchCode( dork, True )
             if type(n_confirm) is int and n_confirm > old_value:
-                message = message + t_new_values[key]['title'] + ' : ' + str(old_value) + ' -> ' + str(t_new_values[key]['data']) + "\n" + t_new_values[key]['info'] + "\n\n"
+                message = message + t_config['github_dorks'][dork]['title'] + ' : ' + str(old_value) + ' -> ' + str(t_config['github_dorks'][dork]['data']) + "\n" + t_config['github_dorks'][dork]['info'] + "\n\n"
+
+    # for key in t_new_values:
+    #     if not type(t_old_values) is dict or not key in t_old_values or not type(t_old_values[key]) is dict or not 'data' in t_old_values[key]:
+    #         old_value = -1
+    #     else:
+    #         old_value = int(t_old_values[key]['data'])
+    #     if t_new_values[key]['data'] != old_value:
+    #         n_confirm = githubApiSearchCode( key, True )
+    #         if type(n_confirm) is int and n_confirm > old_value:
+    #             message = message + t_new_values[key]['title'] + ' : ' + str(old_value) + ' -> ' + str(t_new_values[key]['data']) + "\n" + t_new_values[key]['info'] + "\n\n"
 
 
     if len(message):
