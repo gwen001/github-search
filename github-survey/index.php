@@ -501,7 +501,7 @@ if( isset($_GET['a']) && $_GET['a'] == 'exclude' )
             <div class="row">
                 <div class="col-md-2 list-group">
                     <?php foreach( $t_config['github_dorks'] as $dork=>$datas ) { ?>
-                        <a href="?d=<?php echo __urlencode($dork); ?>" class="list-group-item list-group-item-action"><?php echo $dork; ?></a>
+                        <a href="?d=<?php echo __urlencode($dork); ?>" class="list-group-item <?php if( isset($_GET['d']) && $_GET['d'] == $dork ) { echo 'active'; } ?> list-group-item-action"><?php echo $dork; ?></a>
                     <?php } ?>
                 </div>
                 <?php if( isset($t_filtered) && count($t_filtered) ) { ?>
