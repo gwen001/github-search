@@ -66,6 +66,7 @@ function highlightCode( $content )
 
 function diff2str( $date_diff )
 {
+    // var_dump( $date_diff );
     $str = '';
     if( $date_diff->y ) {
         $str .= $date_diff->y.' years ';
@@ -130,22 +131,6 @@ function doSearchGithub( $dork, $page )
     }
 }
 
-function filterResults( $t_results, $t_exclude, $t_filters )
-{
-    $t_filtered = [];
-
-    foreach( $t_results as $results )
-    {
-        $r = isFiltered( $results, $t_exclude, $t_filters );
-
-        if( !$r ) {
-            $t_filtered[] = $results;
-        }
-    }
-
-    return $t_filtered;
-}
-
 function excludeFusion( $t_config, $dork )
 {
     $t_exclude = [];
@@ -180,6 +165,23 @@ function excludeFusion( $t_config, $dork )
     return $t_exclude;
 }
 
+function filterResults( $t_results, $t_exclude, $t_filters )
+{
+    $t_filtered = [];
+
+    foreach( $t_results as $result )
+    {
+        $r = isFiltered( $result, $t_exclude, $t_filters );
+        // var_dump( $result['repository']['full_name'].'/'.$result['path'] );
+        // var_dump( $r );
+        if( !$r ) {
+            $t_filtered[] = $result;
+        }
+    }
+
+    return $t_filtered;
+}
+
 function isFiltered( $result, $t_exclude, $t_filters )
 {
     // exclude string in the content
@@ -188,6 +190,7 @@ function isFiltered( $result, $t_exclude, $t_filters )
         foreach( $t_exclude['content'] as $exclude ) {
             $m = preg_match( '#('.$exclude.')#', $result['code'] );
             if( $m ) {
+                // var_dump( $exclude );
                 return true;
             }
         }
@@ -283,7 +286,7 @@ function getCommitDates( &$t_filtered )
         $t_headers = [ 'Authorization: token '.$token, 'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.101 Safari/537.36' ];
 
         $commit_id = explode( '=', $result['url'] )[1];
-        $result['commit_url'] = str_replace('{/sha}','/',$result['repository']['git_commits_url']) . $commit_id;
+        $result['commit_url'] = $result['repository']['url'] . '/git/commits/' . $commit_id;
         
         $result['curl'] = curl_init( $result['commit_url'] );
         curl_setopt( $result['curl'], CURLOPT_RETURNTRANSFER, true );
@@ -304,13 +307,14 @@ function getCommitDates( &$t_filtered )
     foreach( $t_filtered as &$result )
     {
         $r = curl_multi_getcontent( $result['curl'] );
+        $t_json = json_decode( $r, true );
 
-        // var_dump( $r );
-        $t_config = json_decode( $r, true );
-
-        if( isset($t_config['sha']) ) {
-            $result['commit_date'] = new DateTime( $t_config['committer']['date'] );
+        if( isset($t_json['sha']) ) {
+            $result['commit_date'] = new DateTime( $t_json['committer']['date'] );
             $now = new DateTime();
+            // var_dump( $t_json['committer']['date'] );
+            // var_dump( $result['commit_date']->format('Y-m-d H:i:s') );
+            // var_dump( $now->format('Y-m-d H:i:s') );
             $date_diff = date_diff( $result['commit_date'], $now );
             $result['commit_date_diff'] = diff2str( $date_diff );
         }
@@ -347,12 +351,10 @@ function getCodes( &$t_filtered )
     foreach( $t_filtered as &$result )
     {
         $r = curl_multi_getcontent( $result['curl'] );
+        $t_json = json_decode( $r, true );
 
-        // var_dump( $r );
-        $t_config = json_decode( $r, true );
-
-        if( isset($t_config['sha']) ) {
-            $result['code'] = base64_decode( str_replace('\n','',$t_config['content']) );
+        if( isset($t_json['sha']) ) {
+            $result['code'] = base64_decode( str_replace('\n','',$t_json['content']) );
         }
     }
 }
@@ -362,6 +364,7 @@ if( isset($_GET['d']) )
 {
     $n_desired = 0;
     $current_page = 0;
+    $t_filtered = [];
     $t_exclude = excludeFusion( $t_config, $_GET['d'] );
 
     do
@@ -370,19 +373,22 @@ if( isset($_GET['d']) )
         if( $t_results === false ) {
             break;
         }
+
         $n_results = count( $t_results['items'] );
         if( !$n_results ) {
             break;
         }
-        $t_filtered = filterResults( $t_results['items'], $t_exclude, ['filepath','extension'] );
+        
+        $t_temp = $t_results['items'];
+        $t_temp = filterResults( $t_temp, $t_exclude, ['filepath','extension'] );
         // break;
+        getCodes( $t_temp );
+        $t_temp = filterResults( $t_temp, $t_exclude, ['content'] ); // yes yes again ! (content filtering)
+        getCommitDates( $t_temp );
 
-        getCodes( $t_filtered );
-        getCommitDates( $t_filtered );
+        $t_filtered = array_merge( $t_filtered, $t_temp );
 
-        // yes yes again ! (content filtering)
-        $t_filtered = filterResults( $t_filtered, $t_exclude, ['content'] );
-        $n_desired += count( $t_filtered );
+        $n_desired = count( $t_filtered );
         $current_page++;
 
         if( $current_page >= MAX_PAGE ) {
@@ -425,6 +431,17 @@ if( isset($_GET['a']) && $_GET['a'] == 'exclude' )
 
         header( 'Content-Type: application/json' );
         echo json_encode( $t_exclude );
+    }
+
+    exit();
+}
+
+if( isset($_GET['a']) && $_GET['a'] == 'lastsha' )
+{
+    if( isset($_POST['d']) && isset($_POST['s']) )
+    {
+        $t_config['github_dorks'][$_POST['d']]['last_sha'] = $_POST['s'];
+        file_put_contents( $f_config, json_encode($t_config,JSON_PRETTY_PRINT) );
     }
 
     exit();
@@ -483,7 +500,11 @@ if( isset($_GET['a']) && $_GET['a'] == 'exclude' )
                 float: right;
             }
             .result_action img {
-                padding-left: 10px;
+                margin-left: 10px;
+                /* width: 24px; */
+            }
+            .result_action input[type="text"] {
+                margin-left: 10px;
                 /* width: 24px; */
             }
             pre {
@@ -492,6 +513,14 @@ if( isset($_GET['a']) && $_GET['a'] == 'exclude' )
                 white-space: -pre-wrap;      /* Opera 4-6 */
                 white-space: -o-pre-wrap;    /* Opera 7 */
                 word-wrap: break-word;
+            }
+            div.lastsha div.result_repository_full_name a,
+            div.lastsha div.result_path a,
+            div.lastsha div.result_commit_date {
+                color: #F00;
+            }
+            div.lastsha pre.result_code {
+                border: 1px solid #F00;
             }
         </style>
     </head>
@@ -507,8 +536,9 @@ if( isset($_GET['a']) && $_GET['a'] == 'exclude' )
                 <?php if( isset($t_filtered) && count($t_filtered) ) { ?>
                 <div class="col-md-7">
                     <?php foreach( $t_filtered as $result ) { ?>
-                        <div class="result" data-full-path="<?php echo $result['repository']['full_name'].'/'.$result['path']; ?>">
+                        <div class="result <?php if( $result['sha']==$t_config['github_dorks'][$_GET['d']]['last_sha'] ) { echo 'lastsha'; }; ?>" data-sha="<?php echo $result['sha']; ?>" data-full-path="<?php echo $result['repository']['full_name'].'/'.$result['path']; ?>">
                             <div class="result_action">
+                                <a href="javascript:setLastSha('<?php echo $result['sha']; ?>');" title="exclude user"><img src="img/macro_names.png" title="exclude user" /></a>
                                 <input type="text" size="10" name="exclude_string" placeholder="exclude results with string..." />
                                 <input type="submit" name="btn_exclude_string" class="btn-exclude-string" value="EX" />
                                 <a href="javascript:excludeFilepath('<?php echo $result['repository']['full_name'].'/'.$result['path']; ?>');" title="exclude file"><img src="img/page_delete.png" title="exclude file" /></a>
@@ -531,6 +561,8 @@ if( isset($_GET['a']) && $_GET['a'] == 'exclude' )
                                     <?php echo $result['commit_date']->format('d/m/Y H:i:s') ?>
                                     -
                                     <?php echo $result['commit_date_diff'] ?>
+                                    -
+                                    <?php echo $result['sha'] ?>
                                 </div>
                             <?php } ?>
                         </div>
@@ -573,6 +605,21 @@ if( isset($_GET['a']) && $_GET['a'] == 'exclude' )
                     }
                 });
             });
+
+            function setLastSha( sha )
+            {
+                datas = 'd=' + getQueryParam('d') + '&s=' + sha;
+
+                $.ajax({
+                    type: 'POST',
+                    url: '?a=lastsha',
+                    data: datas,
+                    dataType: 'json'
+                });
+
+                $('div.result').removeClass('lastsha');
+                $('div.result[data-sha="'+sha+'"]').addClass('lastsha');
+            }
 
             function doExclude( exclude, type )
             {

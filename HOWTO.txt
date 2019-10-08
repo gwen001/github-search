@@ -30,10 +30,12 @@ github-users.py -k <company>
 github-contributors.py -o <company>
 
 - users retrieved from google/linkedin search
-github-employees.py -f <fb_cookie> -t '<company>' -p 50 -m github
-github-employees.py -f <fb_cookie> -t '<company>,<company.com>,<company> developer,<company> engineer,<company> programmer,<company> designer' -p 50 -m linkedin
+github-employees.py -f <fb_cookie> -t <company> -p 50 -m github
+github-employees.py -f <fb_cookie> -t <company> -t <company.com> -t "<company> developer" -t "<company> admin" -t "<company> engineer" -t "<company> programmer" -t "<company> designer" -p 50 -m linkedin
 
--> cat reco-github | egrep -o -i "github.com/[-_a-z0-9]*" | cut -d '/' -f 2 | sort -fu | tr "\n" ","
+### -> cat reco-github | egrep -o -i "github.com/[-_a-z0-9]*" | cut -d '/' -f 2 | sort -fu | tr "\n" ","
+-> cat reco-github | awk -F '|' '{print $3" "$6}' | grep -i tripadvisor | awk '{print $1}' | sort -fu
+-> cat reco-github-sure  | egrep  "github.com/[^ ]+" -o  | cut -d '/' -f 2 | sort -fu | tr "\n" ","
 
 - for all those entities, perform the following code searches (specific to the company, ex: <company>, domain.com)
 github-dorks.php u <user> company-dorks.txt

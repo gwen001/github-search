@@ -13,6 +13,8 @@ import argparse
 import random
 from termcolor import colored
 from texttable import Texttable
+from multiprocessing.dummy import Pool
+
 
 GITHUB_API_URL = 'https://api.github.com'
 
@@ -53,21 +55,22 @@ if gh_org == '' and gh_user == '':
     parser.error( 'user or organization missing' )
 
 
-def ghAPI( endpoint, paging=True ):
+def ghAPI( endpoint, paging=True, verbose=True ):
 #     print( endpoint )
     error = 0
     page = 1
     run = True
     headers = {"Authorization":"token "+random.choice(t_tokens)}
     datas = []
-    
+
     while run:
         try:
             u = GITHUB_API_URL+endpoint
             # print(u)
             if paging:
                 u = u + '?page='+str(page)
-            print( u )
+            if verbose:
+                print( u )
             r = requests.get( u, headers=headers )
             page = page + 1
             if len(r.text):
@@ -84,10 +87,10 @@ def ghAPI( endpoint, paging=True ):
         except Exception as e:
             error = error + 1
             print( colored("[-] error occurred: %s" % e, 'red') )
-        
+
         if error:
             run = False
-        
+
     return datas
 
 if gh_org:
@@ -114,8 +117,8 @@ for repo in r:
     #     break
     if not repo['fork']:
         i = i + 1
-        r = ghAPI( '/repos/'+gh_owner+'/'+repo['name']+'/contributors' )
         sys.stdout.write( '%d/%d https://github.com/%s/%s\n' % (i,n_notfork,gh_owner,repo['name']) )
+        r = ghAPI( '/repos/'+gh_owner+'/'+repo['name']+'/contributors' )
         if type(r) is list:
             for collab in r:
                 sys.stdout.write( "%s (%d)\n" % (collab['login'],collab['contributions']) )
@@ -169,10 +172,13 @@ def grabUserHtmlLight( ghaccount, login ):
                 ghaccount['orgs'].append( o )
 
 
+def doGrabUser( login ):
+    # print(login)
+    # time.sleep( 100/1000 )
+    sys.stdout.write( 'progress: %d/%d\r' %  (t_multiproc['n_current'],t_multiproc['n_total']) )
+    t_multiproc['n_current'] = t_multiproc['n_current'] + 1
 
-for login,collab in sorted(t_collab.items(),reverse=True, key=lambda item:item[1]):
-    time.sleep( 200/1000 )
-    r = ghAPI( '/users/'+login, False )
+    r = ghAPI( '/users/'+login, False, False )
 
     if not type(r) is bool:
         r = r[0]
@@ -185,7 +191,37 @@ for login,collab in sorted(t_collab.items(),reverse=True, key=lambda item:item[1
             orgs = ','.join(r['orgs'])
         else:
             orgs = ''
-        tab.add_row( [collab,html_url,r['name'],orgs,r['email'],r['public_repos']] )
+        
+        collab = {}
+        collab['login'] = login
+        collab['n_collab'] = t_collab[login]
+        collab['html_url'] = html_url
+        collab['name'] = r['name']
+        collab['orgs'] = orgs
+        collab['email'] = r['email']
+        collab['public_repos'] = r['public_repos']
+
+        t_final.append( collab )
+
+
+t_final = []
+
+t_multiproc = {
+    'n_current': 0,
+    'n_total': len(t_collab.keys())
+}
+
+pool = Pool( 10 )
+pool.map( doGrabUser, t_collab.keys() )
+pool.close()
+pool.join()
+
+# print(t_final)
+
+t_sorted = sorted( t_final, reverse=True, key=lambda k:k['n_collab'] )
+
+for collab in t_sorted:
+    tab.add_row( [collab['n_collab'],collab['html_url'],collab['name'],collab['orgs'],collab['email'],collab['public_repos']] )
 
 print( tab.draw() )
 print("\n")

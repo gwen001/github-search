@@ -51,7 +51,8 @@ if not fb_cookie:
     parser.error( 'facebook cookie is missing' )
 
 if args.term:
-    t_terms = args.term.split(',')
+    # t_terms = args.term.split(',')
+    t_terms = args.term
 else:
     # t_terms = []
     if not args.input:

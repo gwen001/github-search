@@ -3,11 +3,11 @@
 # Inspired by @Tomnomnom
 # https://twitter.com/tomnomnom/status/1133345832688857095
 
-# ghfind.sh <keyword>
+# git-history.sh <keyword>
 
 keyword=$1
 
-# if you also his gf tool, you can prefix the keyword: 'k_<keyword>'
+# if you also use his gf tool, you can prefix the keyword: 'k_<keyword>'
 # https://github.com/tomnomnom/gf
 if [ ${keyword:0:2} == "k_" ] ; then
 	k=${keyword:2}
@@ -21,7 +21,7 @@ if [ ${keyword:0:2} == "k_" ] ; then
 		fi
 	fi
 else
-	t_keywords=$keyword
+	t_keywords="#$keyword#"
 fi
 
 n_keywords=${#t_keywords[@]}
@@ -55,7 +55,7 @@ for r in $lrepo ; do
 	cd $rr
 
 	t_idx=$(find .git/objects/pack/ -name "*.idx")
-	# echo $t_idx
+	echo $t_idx
 
 	for idx in $t_idx ; do
 		if [ $fname -eq 1 ] ; then
