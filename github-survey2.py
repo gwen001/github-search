@@ -91,7 +91,7 @@ def githubApiSearchCode( dork, page ):
     # print( headers )
 
     u = 'https://api.github.com/search/code?sort=indexed&order=desc&page=' + str(page) + '&q=' + urllib.parse.quote(dork)
-    # print( u )
+    print( u )
 
     try:
         r = requests.get( u, headers=headers, timeout=5 )
@@ -114,7 +114,7 @@ def doGetCode( result ):
     # print( headers )
 
     try:
-        # print( result['git_url'] )
+        print( result['git_url'] )
         r = requests.get( result['git_url'], headers=headers, timeout=5 )
     except Exception as e:
         sys.stdout.write( "%s[-] error occurred: %s%s\n" % (fg('red'),e,attr(0)) )
@@ -140,7 +140,7 @@ def doGetCommitDate( result ):
 
     commit_id = result['url'].split('=')[-1];
     result['commit_url'] = result['repository']['url'] + '/git/commits/' + commit_id
-    # print( result['commit_url'] )
+    print( result['commit_url'] )
 
     try:
         r = requests.get( result['commit_url'], headers=headers, timeout=5 )
@@ -223,6 +223,7 @@ def getCommitDates( t_filtered ):
     pool.join()
 
 def testDork( n_max_page, dork ):
+    print( dork )
     run = True
     page = 0
     t_dork = t_config['github_dorks'][dork]
