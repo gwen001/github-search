@@ -6,8 +6,8 @@ error_reporting( E_ALL );
 ini_set( 'display_errors', true );
 ini_set( 'display_startup_errors', true );
 
-define( 'N_RESULTS_DESIRED', 25 );
-define( 'MAX_PAGE', 10 );
+define( 'N_RESULTS_DESIRED', 15 );
+define( 'MAX_PAGE', 5 );
 
 $f_tokens = dirname(__FILE__) . '/.tokens';
 if( !is_file($f_tokens) ) {
@@ -448,6 +448,12 @@ if( isset($_GET['a']) && $_GET['a'] == 'lastsha' )
     exit();
 }
 
+if( isset($_GET['a']) && $_GET['a'] == 'runsurvey' )
+{
+    exec( '/opt/github-search/github-survey2.py -c /home/gwen/.config/github-survey.json &' );
+    exit();
+}
+
 ?>
 
 <html>
@@ -523,11 +529,17 @@ if( isset($_GET['a']) && $_GET['a'] == 'lastsha' )
             div.lastsha pre.result_code {
                 border: 1px solid #F00;
             }
+            #btn-run {
+                position: absolute;
+                right: 10px;
+                z-index: 999;
+            }
         </style>
     </head>
 
     <body>
         <div class="container-fluid">
+            <button type="button" class="btn btn-danger" id="btn-run">Run</button>
             <div class="row">
                 <div class="col-md-2 list-group">
                     <?php foreach( $t_config['github_dorks'] as $dork=>$datas ) { ?>
@@ -605,6 +617,12 @@ if( isset($_GET['a']) && $_GET['a'] == 'lastsha' )
                         excludeString( v );
                     }
                 });
+                $("#btn-run").click(function(){
+                    $.ajax({
+                        type: 'POST',
+                        url: '?a=runsurvey'
+                    });
+                });
             });
 
             function setLastSha( sha )
@@ -614,8 +632,7 @@ if( isset($_GET['a']) && $_GET['a'] == 'lastsha' )
                 $.ajax({
                     type: 'POST',
                     url: '?a=lastsha',
-                    data: datas,
-                    dataType: 'json'
+                    data: datas
                 });
 
                 $('div.result').removeClass('lastsha');
