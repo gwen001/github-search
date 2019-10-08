@@ -299,7 +299,7 @@ function getCommitDates( &$t_filtered )
         curl_multi_exec( $mh, $running );
     } while( $running );
 
-    foreach( $t_filtered as $result ) {
+    foreach( $t_filtered as &$result ) {
         curl_multi_remove_handle( $mh, $result['curl'] );
     }
     curl_multi_close( $mh );
@@ -343,7 +343,7 @@ function getCodes( &$t_filtered )
         curl_multi_exec( $mh, $running );
     } while( $running );
 
-    foreach( $t_filtered as $result ) {
+    foreach( $t_filtered as &$result ) {
         curl_multi_remove_handle( $mh, $result['curl'] );
     }
     curl_multi_close( $mh );
@@ -366,6 +366,7 @@ if( isset($_GET['d']) )
     $current_page = 0;
     $t_filtered = [];
     $t_exclude = excludeFusion( $t_config, $_GET['d'] );
+    // var_dump( $t_exclude );
 
     do
     {
@@ -379,14 +380,12 @@ if( isset($_GET['d']) )
             break;
         }
         
-        $t_temp = $t_results['items'];
-        $t_temp = filterResults( $t_temp, $t_exclude, ['filepath','extension'] );
-        // break;
+        $t_temp = filterResults( $t_results['items'], $t_exclude, ['filepath','extension'] );
         getCodes( $t_temp );
-        $t_temp = filterResults( $t_temp, $t_exclude, ['content'] ); // yes yes again ! (content filtering)
-        getCommitDates( $t_temp );
+        $t_temp2 = filterResults( $t_temp, $t_exclude, ['content'] ); // yes yes again ! (content filtering)
+        getCommitDates( $t_temp2 );
 
-        $t_filtered = array_merge( $t_filtered, $t_temp );
+        $t_filtered = array_merge( $t_filtered, $t_temp2 );
 
         $n_desired = count( $t_filtered );
         $current_page++;
@@ -397,9 +396,11 @@ if( isset($_GET['d']) )
     }
     while( $n_desired < N_RESULTS_DESIRED );
 
-    if( count($t_filtered) > N_RESULTS_DESIRED ) {
-        $t_filtered = array_slice( $t_filtered, 0, N_RESULTS_DESIRED );
-    }
+    // var_dump( $t_filtered );
+
+    // if( count($t_filtered) > N_RESULTS_DESIRED ) {
+    //     $t_filtered = array_slice( $t_filtered, 0, N_RESULTS_DESIRED );
+    // }
 }
 
 if( isset($_GET['a']) && $_GET['a'] == 'exclude' )

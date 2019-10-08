@@ -269,6 +269,8 @@ def testDork( n_max_page, dork ):
 ########### MAIN LOOP
 t_final = {}
 
+# testDork( n_max_page, 'uber' )
+
 pool = Pool( t_config['n_multiproc'] )
 pool.map( partial(testDork,n_max_page), t_config['github_dorks'].keys() )
 pool.close()
@@ -277,10 +279,13 @@ pool.join()
 
 
 # ########### SLACK NOTIF
+def san( str ):
+    return str.replace('<','&lt;').replace('>','&gt;').replace('&','&amp;')
+
 def sendSlackNotif( slack_webhook, t_attachments ):
     headers = {"Content-Type": "application/json"}
     t_datas = {
-        'text': "*---------------- " + datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + " ----------------*\n\n",
+        'text': san( "*---------------- " + datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + " ----------------*\n\n" ),
         'attachments': t_attachments
     }
     # print(json.dumps(t_datas))
@@ -301,10 +306,10 @@ if 'slack_webhook' in t_config:
         for result in t_final[dork]:
             t_urls.append( result['html_url'] )
         attachment = {
-            'pretext': t_config['github_dorks'][dork]['title'] + ': +' + str(len(t_final[dork])),
-            'title': t_config['github_dorks'][dork]['info'],
-            'title_link': t_config['github_dorks'][dork]['info'],
-            'text': '```' + "\n".join(t_urls) + '```'
+            'pretext': san( t_config['github_dorks'][dork]['title'] + ': +' + str(len(t_final[dork])) ),
+            'title': san( t_config['github_dorks'][dork]['info'] ),
+            'title_link': san( t_config['github_dorks'][dork]['info'] ),
+            'text': san( '```' + "\n".join(t_urls) + '```' )
         }
         t_attachments.append( attachment )
         # message = message + t_config['github_dorks'][dork]['title'] + ': +' + str(len(t_final[dork])) + "\n" + t_config['github_dorks'][dork]['info'] + "\n\n"
