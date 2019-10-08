@@ -259,20 +259,20 @@ def testDork( n_max_page, dork ):
     getCodes( t_filtered )
     t_filtered = filterResults( t_filtered, t_exclude, ['content'] ) # yes yes again ! (content filtering)
     # getCommitDates( t_filtered )
+    # print( t_filtered )
 
     t_new[dork] = len(t_filtered)
-    
 
 
 ########### MAIN LOOP
 t_new = {}
 
-testDork( n_max_page, 'gogoinflight' )
+# testDork( n_max_page, 'gogoinflight' )
 
-# pool = Pool( t_config['n_multiproc'] )
-# pool.map( partial(testDork,n_max_page), t_config['github_dorks'].keys() )
-# pool.close()
-# pool.join()
+pool = Pool( t_config['n_multiproc'] )
+pool.map( partial(testDork,n_max_page), t_config['github_dorks'].keys() )
+pool.close()
+pool.join()
 
 
 
