@@ -262,13 +262,12 @@ def testDork( n_max_page, dork ):
     # getCommitDates( t_filtered )
     # print( t_filtered )
 
-    t_new[dork] = len(t_filtered)
+    if len(t_filtered):
+        t_final[dork] = t_filtered
 
 
 ########### MAIN LOOP
-t_new = {}
-
-# testDork( n_max_page, 'gogoinflight' )
+t_final = {}
 
 pool = Pool( t_config['n_multiproc'] )
 pool.map( partial(testDork,n_max_page), t_config['github_dorks'].keys() )
@@ -278,9 +277,12 @@ pool.join()
 
 
 # ########### SLACK NOTIF
-def sendSlackNotif( slack_webhook, message ):
+def sendSlackNotif( slack_webhook, t_attachments ):
     headers = {"Content-Type": "application/json"}
-    t_datas = {"text": message}
+    t_datas = {
+        'text': "*---------------- " + datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + " ----------------*\n\n",
+        'attachments': t_attachments
+    }
     # print(json.dumps(t_datas))
 
     try:
@@ -292,14 +294,24 @@ def sendSlackNotif( slack_webhook, message ):
 
 if 'slack_webhook' in t_config:
     message = ''
+    t_attachments = []
 
-    for dork,n_new in t_new.items():
-        if n_new > 0:
-            message = message + t_config['github_dorks'][dork]['title'] + ': +' + str(n_new) + "\n" + t_config['github_dorks'][dork]['info'] + "\n\n"
+    for dork in t_final.keys():
+        t_urls = []
+        for result in t_final[dork]:
+            t_urls.append( result['html_url'] )
+        attachment = {
+            'pretext': t_config['github_dorks'][dork]['title'] + ': +' + str(len(t_final[dork])),
+            'title': t_config['github_dorks'][dork]['info'],
+            'title_link': t_config['github_dorks'][dork]['info'],
+            'text': '```' + "\n".join(t_urls) + '```'
+        }
+        t_attachments.append( attachment )
+        # message = message + t_config['github_dorks'][dork]['title'] + ': +' + str(len(t_final[dork])) + "\n" + t_config['github_dorks'][dork]['info'] + "\n\n"
 
-    if len(message):
+    if len(t_attachments):
         # print(message)
-        message = "---------------- " + datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + " ----------------\n\n" + message
+        # message = "*---------------- " + datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + " ----------------*\n\n" + message
         # print(message)
-        sendSlackNotif( t_config['slack_webhook'], message )
+        sendSlackNotif( t_config['slack_webhook'], t_attachments )
 
