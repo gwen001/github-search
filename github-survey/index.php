@@ -7,7 +7,7 @@ ini_set( 'display_errors', true );
 ini_set( 'display_startup_errors', true );
 
 define( 'N_RESULTS_DESIRED', 15 );
-define( 'MAX_PAGE', 1 );
+define( 'DEFAULT_MAX_PAGE', 3 );
 
 $f_tokens = dirname(__FILE__) . '/.tokens';
 if( !is_file($f_tokens) ) {
@@ -411,7 +411,7 @@ if( isset($_GET['d']) )
 {
     $n_desired = 0;
     // $current_page = 0;
-    $max_page = isset($_GET['p']) ? (int)$_GET['p'] : MAX_PAGE;
+    $max_page = isset($_GET['p']) ? (int)$_GET['p'] : DEFAULT_MAX_PAGE;
     $t_exclude = excludeFusion( $t_config, $_GET['d'] );
     // var_dump( $t_exclude );
 
@@ -599,7 +599,7 @@ if( isset($_GET['a']) && $_GET['a'] == 'runsurvey' )
             <div class="row">
                 <div class="col-md-2 list-group">
                     <?php foreach( $t_config['github_dorks'] as $dork=>$datas ) { ?>
-                        <a href="?d=<?php echo __urlencode($dork); ?>" class="list-group-item <?php if( isset($_GET['d']) && $_GET['d'] == $dork ) { echo 'active'; } ?> list-group-item-action"><?php echo $dork; ?></a>
+                        <a href="?d=<?php echo __urlencode($dork); ?>&p=<?php echo DEFAULT_MAX_PAGE; ?>" class="list-group-item <?php if( isset($_GET['d']) && $_GET['d'] == $dork ) { echo 'active'; } ?> list-group-item-action"><?php echo $dork; ?></a>
                     <?php } ?>
                 </div>
                 <?php if( isset($t_filtered) && count($t_filtered) ) { ?>
