@@ -7,7 +7,7 @@ ini_set( 'display_errors', true );
 ini_set( 'display_startup_errors', true );
 
 define( 'N_RESULTS_DESIRED', 15 );
-define( 'MAX_PAGE', 5 );
+define( 'MAX_PAGE', 1 );
 
 $f_tokens = dirname(__FILE__) . '/.tokens';
 if( !is_file($f_tokens) ) {
@@ -122,12 +122,12 @@ function doSearchGithub( $dork, $page )
     curl_close( $c );
     
     // var_dump( $r );
-    $t_config = json_decode( $r, true );
+    $t_json = json_decode( $r, true );
     
-    if( !isset($t_config['total_count']) ) {
+    if( !isset($t_json['total_count']) ) {
         return false;
     } else {
-        return $t_config;
+        return $t_json;
     }
 }
 
@@ -359,42 +359,98 @@ function getCodes( &$t_filtered )
     }
 }
 
+function getPagesResults( $dork, $max_page )
+{
+    global $t_tokens;
+
+    $t_curl = [];
+    $t_results = [];
+    $mh = curl_multi_init();
+
+    for( $p=0 ; $p<$max_page ; $p++ )
+    {
+        $token = $t_tokens[ rand(0,count($t_tokens)-1) ];
+        $t_headers = [ 'Authorization: token '.$token, 'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.101 Safari/537.36' ];
+        $url = 'https://api.github.com/search/code?sort=indexed&order=desc&page=' . $p . '&q=' . __urlencode($dork);
+        
+        $t_curl[$p] = curl_init( $url );
+        curl_setopt( $t_curl[$p], CURLOPT_RETURNTRANSFER, true );
+        curl_setopt( $t_curl[$p], CURLOPT_HTTPHEADER, $t_headers );
+        curl_multi_add_handle( $mh, $t_curl[$p] );
+    }
+
+    $running = null;
+    do {
+        curl_multi_exec( $mh, $running );
+    } while( $running );
+
+    for( $p=0 ; $p<$max_page ; $p++ ) {
+        curl_multi_remove_handle( $mh, $t_curl[$p] );
+    }
+    curl_multi_close( $mh );
+
+    for( $p=0 ; $p<$max_page ; $p++ )
+    {
+        $r = curl_multi_getcontent( $t_curl[$p] );
+
+        if( $r )
+        {
+            $t_json = json_decode( $r, true );
+        
+            if( isset($t_json['total_count']) ) {
+                $t_results = array_merge( $t_results, $t_json['items'] );
+            }
+        }
+    }
+
+    return $t_results;
+}
+
 
 if( isset($_GET['d']) )
 {
     $n_desired = 0;
-    $current_page = 0;
-    $t_filtered = [];
+    // $current_page = 0;
+    $max_page = isset($_GET['p']) ? (int)$_GET['p'] : MAX_PAGE;
     $t_exclude = excludeFusion( $t_config, $_GET['d'] );
     // var_dump( $t_exclude );
 
-    do
-    {
-        $t_results = doSearchGithub( $_GET['d'], $current_page );
-        if( $t_results === false ) {
-            break;
-        }
+    $t_filtered = [];
+    $t_results = getPagesResults( $_GET['d'], $max_page );
+    $t_temp = filterResults( $t_results, $t_exclude, ['filepath','extension'] );
+    getCodes( $t_temp );
+    $t_temp2 = filterResults( $t_temp, $t_exclude, ['content'] ); // yes yes again ! (content filtering)
+    getCommitDates( $t_temp2 );
 
-        $n_results = count( $t_results['items'] );
-        if( !$n_results ) {
-            break;
-        }
+    $t_filtered = array_merge( $t_filtered, $t_temp2 );
+
+    // do
+    // {
+    //     $t_results = doSearchGithub( $_GET['d'], $current_page );
+    //     if( $t_results === false ) {
+    //         break;
+    //     }
+
+    //     $n_results = count( $t_results['items'] );
+    //     if( !$n_results ) {
+    //         break;
+    //     }
         
-        $t_temp = filterResults( $t_results['items'], $t_exclude, ['filepath','extension'] );
-        getCodes( $t_temp );
-        $t_temp2 = filterResults( $t_temp, $t_exclude, ['content'] ); // yes yes again ! (content filtering)
-        getCommitDates( $t_temp2 );
+    //     $t_temp = filterResults( $t_results['items'], $t_exclude, ['filepath','extension'] );
+    //     getCodes( $t_temp );
+    //     $t_temp2 = filterResults( $t_temp, $t_exclude, ['content'] ); // yes yes again ! (content filtering)
+    //     getCommitDates( $t_temp2 );
 
-        $t_filtered = array_merge( $t_filtered, $t_temp2 );
+    //     $t_filtered = array_merge( $t_filtered, $t_temp2 );
 
-        $n_desired = count( $t_filtered );
-        $current_page++;
+    //     $n_desired = count( $t_filtered );
+    //     $current_page++;
 
-        if( $current_page >= MAX_PAGE ) {
-            break;
-        }
-    }
-    while( $n_desired < N_RESULTS_DESIRED );
+    //     if( $current_page >= MAX_PAGE ) {
+    //         break;
+    //     }
+    // }
+    // while( $n_desired < N_RESULTS_DESIRED );
 
     // var_dump( $t_filtered );
 
@@ -586,7 +642,6 @@ if( isset($_GET['a']) && $_GET['a'] == 'runsurvey' )
                 <div class="col-md-3">
                     <div class="github_search_link">
                         <a href="https://github.com/search?o=desc&s=indexed&type=Code&q=<?php echo __urlencode($_GET['d']); ?>" target="_blank">https://github.com/search?o=desc&s=indexed&type=Code&q=<?php echo __urlencode($_GET['d']); ?></a>
-                        (page <?php echo ($current_page-1); ?>)
                     </div>
                     <div>
                         <pre class="exclude_list"><?php echo json_encode( $t_exclude, JSON_PRETTY_PRINT ); ?></pre>
