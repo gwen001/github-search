@@ -221,7 +221,7 @@ pool.join()
 t_sorted = sorted( t_final, reverse=True, key=lambda k:k['n_collab'] )
 
 for collab in t_sorted:
-    tab.add_row( [collab['n_collab'],collab['html_url'],collab['name'],collab['orgs'],collab['email'],collab['public_repos']] )
+    tab.add_row( [collab['n_collab'],collab['html_url'],collab['name'],collab['email'],collab['orgs'],collab['public_repos']] )
 
 print( tab.draw() )
 print("\n")

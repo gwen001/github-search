@@ -21,6 +21,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument( "-d","--dorks",help="dorks file" )
 parser.add_argument( "-t","--token",help="auth token" )
 parser.add_argument( "-o","--org",help="organization" )
+parser.add_argument( "-e","--threads",help="maximum n threads" )
 parser.add_argument( "-u","--user",help="user" )
 parser.parse_args()
 args = parser.parse_args()
@@ -45,6 +46,11 @@ if not len(t_tokens):
 
 if args.user:
     t_users = args.user.split(',')
+
+if args.threads:
+    threads = int(args.threads)
+else:
+    threads = 1
 
 if args.org:
     t_orgs = args.org.split(',')
@@ -132,17 +138,15 @@ for user in t_users:
 t_stats['n_total_urls'] = len(t_urls)
 # exit()
 
-MAX_THREAD = 1
-
 sys.stdout.write( colored('%d organizations found.\n' %  len(t_orgs), 'green') )
 sys.stdout.write( colored('%d users found.\n' %  len(t_users), 'green') )
 sys.stdout.write( colored('%d dorks found.\n' %  len(t_dorks), 'green') )
 sys.stdout.write( colored('%d urls generated.\n' %  len(t_urls), 'green') )
-sys.stdout.write( '[+] running %d threads.\n' %  MAX_THREAD )
+sys.stdout.write( '[+] running %d threads.\n' %  threads )
 
 time.sleep( 1 )
 
-pool = Pool( MAX_THREAD )
+pool = Pool( threads )
 pool.map( githubApiSearchCode, t_urls )
 pool.close()
 pool.join()

@@ -407,11 +407,27 @@ function getPagesResults( $dork, $max_page )
 }
 
 
-if( isset($_GET['d']) )
+if( isset($_GET['d']) && isset($t_config['github_dorks'][$_GET['d']]) )
 {
     $n_desired = 0;
     // $current_page = 0;
     $max_page = isset($_GET['p']) ? (int)$_GET['p'] : DEFAULT_MAX_PAGE;
+
+    if( !is_array($t_config['github_dorks'][$_GET['d']]) ) {
+        $t_config['github_dorks'][$_GET['d']] = [
+            'title' => 'github search code \'' . $_GET['d'] . '\'',
+            'info' => 'https://github.com/search?o=desc&s=indexed&type=Code&q=' . urlencode($_GET['d']),
+            'last_sha' => '',
+            'data' => 0,
+            'exclude' => [
+                'filepath' => [],
+                'content' => [],
+                'extension' => [],
+            ],
+        ];
+        file_put_contents( $f_config, json_encode($t_config,JSON_PRETTY_PRINT) );
+    }
+
     $t_exclude = excludeFusion( $t_config, $_GET['d'] );
     // var_dump( $t_exclude );
 
@@ -607,7 +623,7 @@ if( isset($_GET['a']) && $_GET['a'] == 'runsurvey' )
                     <?php foreach( $t_filtered as $result ) { ?>
                         <div class="result <?php if( $result['sha']==$t_config['github_dorks'][$_GET['d']]['last_sha'] ) { echo 'lastsha'; }; ?>" data-sha="<?php echo $result['sha']; ?>" data-full-path="<?php echo $result['repository']['full_name'].'/'.$result['path']; ?>">
                             <div class="result_action">
-                                <a href="javascript:setLastSha('<?php echo $result['sha']; ?>');" title="exclude user"><img src="img/macro_names.png" title="exclude user" /></a>
+                                <a href="javascript:setLastSha('<?php echo $result['sha']; ?>');" title="exclude user"><img src="img/macro_names.png" title="set as last viewed" /></a>
                                 <input type="text" size="10" name="exclude_string" placeholder="exclude results with string..." />
                                 <input type="submit" name="btn_exclude_string" class="btn-exclude-string" value="EX" />
                                 <a href="javascript:excludeFilepath('<?php echo $result['repository']['full_name'].'/'.$result['path']; ?>');" title="exclude file"><img src="img/page_delete.png" title="exclude file" /></a>
@@ -644,6 +660,7 @@ if( isset($_GET['a']) && $_GET['a'] == 'runsurvey' )
                         <a href="https://github.com/search?o=desc&s=indexed&type=Code&q=<?php echo __urlencode($_GET['d']); ?>" target="_blank">https://github.com/search?o=desc&s=indexed&type=Code&q=<?php echo __urlencode($_GET['d']); ?></a>
                     </div>
                     <div>
+                        Exclude:
                         <pre class="exclude_list"><?php echo json_encode( $t_exclude, JSON_PRETTY_PRINT ); ?></pre>
                     </div>
                 </div>

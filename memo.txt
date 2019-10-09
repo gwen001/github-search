@@ -14,6 +14,14 @@ extension: extension:py
 
 
 
+Exclusion:
+string: hello NOT world
+qualifier: cats stars:>10 -language:javascript
+
+Use quotation marks for queries with whitespace
+cats NOT "hello world"
+
+
 
 Advanced options:
 Location of the searched term: in:file/path
@@ -75,10 +83,3 @@ range: cats pushed:2016-04-30..2016-07-04
 Date + Time:
 cats created:2017-01-01T01:00:00+07:00..2017-03-01T15:30:15+07:00
 cats created:2016-03-21T14:11:00Z..2016-04-07T20:45:00Z
-
-Exclusion:
-string: hello NOT world
-qualifier: cats stars:>10 -language:javascript
-
-Use quotation marks for queries with whitespace
-cats NOT "hello world"

@@ -37,10 +37,10 @@ def on_press( key ):
 
 parser = argparse.ArgumentParser()
 parser.add_argument( "-p","--path",help="path to scan" )
-parser.add_argument( "-d","--date",help="do no check commit before this date" )
+parser.add_argument( "-d","--date",help="do no check commits prior this date, format: YYYY-MM-DD" )
 parser.add_argument( "-c","--length",help="only check in first n characters" )
 parser.add_argument( "-s","--search",help="term to search (regexp)" )
-parser.add_argument( "-t","--threads",help="max threads, default 10" )
+parser.add_argument( "-t","--threads",help="max threads, default: 10" )
 parser.parse_args()
 args = parser.parse_args()
 

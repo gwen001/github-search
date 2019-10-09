@@ -226,9 +226,26 @@ def testDork( n_max_page, dork ):
     print( dork )
     run = True
     page = 0
-    t_dork = t_config['github_dorks'][dork]
     t_result = []
-    
+    t_dork = t_config['github_dorks'][dork]
+
+    if not type(t_dork) is dict or not len(t_dork):
+        t_config['github_dorks'][dork] = {
+            'title': 'github search code \'' + dork + '\'',
+            'info': 'https://github.com/search?o=desc&s=indexed&type=Code&q=' + urllib.parse.quote(dork),
+            'last_sha': '',
+            'data': 0,
+            'exclude': {
+                'filepath': [],
+                'content': [],
+                'extension': []
+            }
+        }
+        t_dork = t_config['github_dorks'][dork]
+        with open(config_file, 'w') as jfile:
+            json.dump( t_config, jfile, indent=4 )
+
+
     if 'last_sha' in t_dork:
         last_sha = t_dork['last_sha']
     else:
