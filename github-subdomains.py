@@ -10,6 +10,7 @@ import time
 import requests
 import random
 import argparse
+from functools import partial
 from colored import fg, bg, attr
 from multiprocessing.dummy import Pool
 
@@ -37,13 +38,13 @@ def getRawUrl( result ):
     return raw_url;
 
 
-def readCode( result ):
+def readCode( regexp, result ):
     url = getRawUrl( result )
     code = doGetCode( url )
     # print(code)
     
     if code:
-        matches = re.findall( r'[0-9a-zA-Z_\-\.]+\.'+_domain, code )
+        matches = re.findall( regexp, code )
         if matches:
             for sub in  matches:
                 if not sub in t_history:
@@ -65,6 +66,7 @@ def doGetCode( url ):
 parser = argparse.ArgumentParser()
 parser.add_argument( "-t","--token",help="auth token (required)" )
 parser.add_argument( "-d","--domain",help="domain you are looking for (required)" )
+parser.add_argument( "-e","--extend",help="also look for <dummy>example.com", action="store_true" )
 parser.parse_args()
 args = parser.parse_args()
 
@@ -85,6 +87,11 @@ if args.domain:
 else:
     parser.error( 'domain is missing' )
 
+if args.extend:
+    _regexp = r'[0-9a-zA-Z_\-\.]+' + _domain.replace('.','\.')
+else:
+    _regexp = r'[0-9a-zA-Z_\-\.]+\.' + _domain.replace('.','\.')
+
 t_history = []
 page = 1
 _search = '"' + _domain + '"'
@@ -99,6 +106,6 @@ while True:
     # print(t_json)
 
     pool = Pool( 30 )
-    pool.map( readCode, t_json['items'] )
+    pool.map( partial(readCode,_regexp), t_json['items'] )
     pool.close()
     pool.join()
