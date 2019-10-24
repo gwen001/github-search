@@ -102,9 +102,18 @@ if args.extend:
 else:
     _regexp = r'[0-9a-zA-Z_\-\.]+\.' + _domain.replace('.','\.')
 
+
 t_history = []
 page = 1
 _search = '"' + _domain + '"'
+
+### this is a test, looks like we got more result that way
+import tldextract
+t_host_parse = tldextract.extract( _domain )
+_search = '"' + t_host_parse.domain + '"'
+# print( t_host_parse )
+# exit()
+###
 
 # for page in range(1,10):
 while True:
