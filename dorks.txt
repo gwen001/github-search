@@ -54,6 +54,12 @@ filename:shadow
 filename:sshd_config
 filename:known_hosts
 
+staging
+stg
+prod
+preprod
+swagger
+internal
 dotfiles
 dot-files
 mydotfiles
@@ -62,6 +68,7 @@ dbpasswd
 db_password
 db_username
 dbuser
+testuser
 dbpassword
 keyPassword
 storePassword
@@ -105,6 +112,9 @@ application_key
 appkey
 appkeysecret
 access_key
+apiSecret
+x-api-key
+apidocs
 secret_access_key
 encryption_key
 consumer_key
@@ -117,11 +127,15 @@ ssh2_auth_password
 irc_pass
 fb_secret
 sf_username
+node_env
 aws_key
 aws_token
 aws_secret
 aws_access
 AWSSecretKey
+github_key
+github_token
+gh_token
 slack_api
 slack_token
 bucket_password
@@ -134,9 +148,10 @@ codecov_token
 fabricApiSecret
 mailgun
 mailchimp
-github_key
-github_token
-node_env
-gh_token
+appspot
+firebase
 gitlab
 stripe
+herokuapp
+cloudfront
+amazonaws

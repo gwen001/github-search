@@ -23,7 +23,7 @@ from lockfile import LockFile
 parser = argparse.ArgumentParser()
 parser.add_argument( "-m","--mod",help="module to use to search employees on google, available: linkedin, github, default: github" )
 parser.add_argument( "-s","--startpage",help="search start page, default 0" )
-parser.add_argument( "-f","--fbcookie",help="your facebook cookie" )
+parser.add_argument( "-f","--fbcookie",help="your facebook cookie (or set env var FACEBOOK_COOKIE)" )
 parser.add_argument( "-t","--term",help="term (usually company name)", action="append" )
 parser.add_argument( "-p","--page",help="n page to grab, default 10" )
 parser.add_argument( "-r","--resume",help="resume previous session" )

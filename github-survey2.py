@@ -26,7 +26,7 @@ from multiprocessing.dummy import Pool
 parser = argparse.ArgumentParser()
 parser.add_argument( "-t","--token",help="auth token", action="append" )
 parser.add_argument( "-p","--page",help="n max page" )
-parser.add_argument( "-c","--config",help="config file" )
+parser.add_argument( "-c","--config",help="config file, default: ~/.config/github-survey.json" )
 parser.parse_args()
 args = parser.parse_args()
 
