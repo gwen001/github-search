@@ -27,7 +27,7 @@ def githubApiSearchCode( search, page ):
         json = r.json()
         return json
     except Exception as e:
-        print( colored("[-] error occurred: %s" % e, 'red') )
+        print( "%s[-] error occurred: %s%s" % (fg('red'),e,attr(0)) )
         return False
 
 
@@ -38,7 +38,7 @@ def getRawUrl( result ):
     return raw_url;
 
 
-def readCode( regexp, result ):
+def readCode( regexp, source, result ):
     url = getRawUrl( result )
     code = doGetCode( url )
     # print(code)
@@ -50,7 +50,10 @@ def readCode( regexp, result ):
                 sub = sub.replace('2F','').lower()
                 if not sub in t_history:
                     t_history.append( sub )
-                    print( sub )
+                    sys.stdout.write( "%s" % sub )
+                    if source:
+                        sys.stdout.write( "\t-> %s" % result['html_url'] )
+                    sys.stdout.write( "\n" )
 
 
 def doGetCode( url ):
@@ -68,6 +71,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument( "-t","--token",help="auth token (required)" )
 parser.add_argument( "-d","--domain",help="domain you are looking for (required)" )
 parser.add_argument( "-e","--extend",help="also look for <dummy>example.com", action="store_true" )
+parser.add_argument( "-s","--source",help="display first url where subdomains are found", action="store_true" )
 parser.parse_args()
 args = parser.parse_args()
 
@@ -82,6 +86,11 @@ else:
 
 if not len(t_tokens):
     parser.error( 'auth token is missing' )
+
+if args.source:
+    _source = True
+else:
+    _source = False
 
 if args.domain:
     _domain = args.domain
@@ -107,6 +116,6 @@ while True:
     # print(t_json)
 
     pool = Pool( 30 )
-    pool.map( partial(readCode,_regexp), t_json['items'] )
+    pool.map( partial(readCode,_regexp,_source), t_json['items'] )
     pool.close()
     pool.join()
