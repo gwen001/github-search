@@ -64,7 +64,7 @@ def doGetCode( url ):
 
 parser = argparse.ArgumentParser()
 parser.add_argument( "-t","--token",help="auth token (required)" )
-parser.add_argument( "-d","--domain",help="domain you already know (required or -c)" )
+parser.add_argument( "-d","--domain",help="domain you are looking for (required)" )
 parser.parse_args()
 args = parser.parse_args()
 
