@@ -47,6 +47,7 @@ def readCode( regexp, result ):
         matches = re.findall( regexp, code )
         if matches:
             for sub in  matches:
+                sub = sub.replace('2F','')
                 if not sub in t_history:
                     t_history.append( sub )
                     print( sub )
