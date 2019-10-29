@@ -47,7 +47,8 @@ def readCode( regexp, source, result ):
         matches = re.findall( regexp, code )
         if matches:
             for sub in  matches:
-                sub = sub.replace('2F','').lower().strip()
+                # print(sub)
+                sub = sub[0].replace('2F','').lower().strip()
                 if len(sub) and not sub in t_history:
                     t_history.append( sub )
                     sys.stdout.write( "%s" % sub )
@@ -97,12 +98,6 @@ if args.domain:
 else:
     parser.error( 'domain is missing' )
 
-if args.extend:
-    _regexp = r'[0-9a-zA-Z_\-\.]+' + _domain.replace('.','\.')
-else:
-    _regexp = r'[0-9a-zA-Z_\-\.]+\.' + _domain.replace('.','\.')
-
-
 t_history = []
 page = 1
 _search = '"' + _domain + '"'
@@ -115,14 +110,25 @@ _search = '"' + t_host_parse.domain + '"'
 # exit()
 ###
 
+# egrep -io "[0-9a-z_\-\.]+\.([0-9a-z_\-]+)?`echo $h|awk -F '.' '{print $(NF-1)}'`([0-9a-z_\-\.]+)?\.[a-z]{1,5}"
+
+
+if args.extend:
+    # _regexp = r'[0-9a-zA-Z_\-\.]+' + _domain.replace('.','\.')
+    _regexp = r'([0-9a-z_\-\.]+\.([0-9a-z_\-]+)?'+t_host_parse.domain+'([0-9a-z_\-\.]+)?\.[a-z]{1,5})'
+else:
+    _regexp = r'(([0-9a-zA-Z_\-\.]+)\.' + _domain.replace('.','\.')+')'
+# print(_regexp)
+
 # for page in range(1,10):
 while True:
     time.sleep( 1 )
     t_json = githubApiSearchCode( _search, page )
+    # print(t_json)
     page = page + 1
+
     if not t_json or 'documentation_url' in t_json or not 'items' in t_json or not len(t_json['items']):
         break
-    # print(t_json)
 
     pool = Pool( 30 )
     pool.map( partial(readCode,_regexp,_source), t_json['items'] )
