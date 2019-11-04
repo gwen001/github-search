@@ -49,8 +49,8 @@ t_exclude = [
 ]
 t_regexp = [
     r'[\'"\(].*(http[s]?://'+_url_chars+'*?)[\'"\)]',
-	r'[\'"\(](http[s]?://'+_url_chars+'+)',
-	
+    r'[\'"\(](http[s]?://'+_url_chars+'+)',
+
     r'[\'"\(]('+_url_chars+'+\.sdirect'+_url_chars+'*)',
     r'[\'"\(]('+_url_chars+'+\.htm'+_url_chars+'*)',
     r'[\'"\(]('+_url_chars+'+\.php'+_url_chars+'*)',
@@ -60,22 +60,22 @@ t_regexp = [
     r'[\'"\(]('+_url_chars+'+\.ini'+_url_chars+'*)',
     r'[\'"\(]('+_url_chars+'+\.conf'+_url_chars+'*)',
     r'[\'"\(]('+_url_chars+'+\.cfm'+_url_chars+'*)',
-	
-	r'href\s*[.=]\s*[\'"]('+_url_chars+'+)',
-	r'src\s*[.=]\s*[\'"]('+_url_chars+'+)',
-	r'url\s*[:=]\s*[\'"]('+_url_chars+'+)',
 
-	r'urlRoot\s*[:=]\s*[\'"]('+_url_chars+'+)',
-	r'endpoint[s]\s*[:=]\s*[\'"]('+_url_chars+'+)',
-	r'script[s]\s*[:=]\s*[\'"]('+_url_chars+'+)',
+    r'href\s*[.=]\s*[\'"]('+_url_chars+'+)',
+    r'src\s*[.=]\s*[\'"]('+_url_chars+'+)',
+    r'url\s*[:=]\s*[\'"]('+_url_chars+'+)',
 
-	r'\.ajax\s*\(\s*[\'"]('+_url_chars+'+)',
-	r'\.get\s*\(\s*[\'"]('+_url_chars+'+)',
-	r'\.post\s*\(\s*[\'"]('+_url_chars+'+)',
-	r'\.load\s*\(\s*[\'"]('+_url_chars+'+)',
+    r'urlRoot\s*[:=]\s*[\'"]('+_url_chars+'+)',
+    r'endpoint[s]\s*[:=]\s*[\'"]('+_url_chars+'+)',
+    r'script[s]\s*[:=]\s*[\'"]('+_url_chars+'+)',
+
+    r'\.ajax\s*\(\s*[\'"]('+_url_chars+'+)',
+    r'\.get\s*\(\s*[\'"]('+_url_chars+'+)',
+    r'\.post\s*\(\s*[\'"]('+_url_chars+'+)',
+    r'\.load\s*\(\s*[\'"]('+_url_chars+'+)',
 
     ### a bit noisy
-	# r'[\'"](' + _url_chars + '+/' + _url_chars + '+)?[\'"]',
+    # r'[\'"](' + _url_chars + '+/' + _url_chars + '+)?[\'"]',
     # r'content\s*[.=]\s*[\'"]('+_url_chars+'+)',
 ]
 
