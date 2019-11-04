@@ -1,0 +1,250 @@
+#!/usr/bin/python3.5
+
+# I don't believe in license.
+# You can do whatever you want with this program.
+
+import os
+import sys
+import re
+import time
+import requests
+import random
+import argparse
+from urllib.parse import urlparse
+from functools import partial
+from colored import fg, bg, attr
+from multiprocessing.dummy import Pool
+
+TOKENS_FILE = '.tokens'
+MIN_LENGTH = 5
+_url_chars = '[a-zA-Z0-9\-\.\?\#\$&=_:/\]\[]'
+_not_url_chars = '[^a-zA-Z0-9\-\.\?\#\$&=_:/\]\[]'
+t_endpoints = []
+t_exclude = [
+    r'^http://$',
+    r'^https://$',
+    r'^javascript:$',
+    r'^tel:$',
+    r'^mailto:$',
+    r'^text/javascript$',
+    r'^application/json$',
+    r'^application/javascript$',
+    r'^text/plain$',
+    r'^text/html$',
+    r'^text/x-python$',
+    r'^text/css$',
+    r'^image/png$',
+    r'^image/jpeg$',
+    r'^image/x-icon$',
+    r'^img/favicon.ico$',
+    r'^application/x-www-form-urlencoded$',
+    r'/Users/[0-9a-zA-Z\-\_]/Desktop',
+    r'www.w3.org',
+    r'schemas.android.com',
+    r'www.apple.com',
+    # r'^#',
+    # r'^\?',
+    # r'^javascript:',
+    # r'^mailto:',
+]
+t_regexp = [
+    r'[\'"\(].*(http[s]?://'+_url_chars+'*?)[\'"\)]',
+	r'[\'"\(](http[s]?://'+_url_chars+'+)',
+	
+    r'[\'"\(]('+_url_chars+'+\.sdirect'+_url_chars+'*)',
+    r'[\'"\(]('+_url_chars+'+\.htm'+_url_chars+'*)',
+    r'[\'"\(]('+_url_chars+'+\.php'+_url_chars+'*)',
+    r'[\'"\(]('+_url_chars+'+\.asp'+_url_chars+'*)',
+    r'[\'"\(]('+_url_chars+'+\.js'+_url_chars+'*)',
+    r'[\'"\(]('+_url_chars+'+\.xml'+_url_chars+'*)',
+    r'[\'"\(]('+_url_chars+'+\.ini'+_url_chars+'*)',
+    r'[\'"\(]('+_url_chars+'+\.conf'+_url_chars+'*)',
+    r'[\'"\(]('+_url_chars+'+\.cfm'+_url_chars+'*)',
+	
+	r'href\s*[.=]\s*[\'"]('+_url_chars+'+)',
+	r'src\s*[.=]\s*[\'"]('+_url_chars+'+)',
+	r'url\s*[:=]\s*[\'"]('+_url_chars+'+)',
+
+	r'urlRoot\s*[:=]\s*[\'"]('+_url_chars+'+)',
+	r'endpoint[s]\s*[:=]\s*[\'"]('+_url_chars+'+)',
+	r'script[s]\s*[:=]\s*[\'"]('+_url_chars+'+)',
+
+	r'\.ajax\s*\(\s*[\'"]('+_url_chars+'+)',
+	r'\.get\s*\(\s*[\'"]('+_url_chars+'+)',
+	r'\.post\s*\(\s*[\'"]('+_url_chars+'+)',
+	r'\.load\s*\(\s*[\'"]('+_url_chars+'+)',
+
+    ### a bit noisy
+	# r'[\'"](' + _url_chars + '+/' + _url_chars + '+)?[\'"]',
+    # r'content\s*[.=]\s*[\'"]('+_url_chars+'+)',
+]
+
+def githubApiSearchCode( search, page ):
+    headers = {"Authorization":"token "+random.choice(t_tokens)}
+    url = 'https://api.github.com/search/code?s=indexed&type=Code&o=desc&q=' + search + '&page=' + str(page)
+    # print(url)
+    
+    try:
+        r = requests.get( url, headers=headers, timeout=5 )
+        json = r.json()
+        return json
+    except Exception as e:
+        print( "%s[-] error occurred: %s%s" % (fg('red'),e,attr(0)) )
+        return False
+
+
+def getRawUrl( result ):
+    raw_url = result['html_url'];
+    raw_url = raw_url.replace( 'https://github.com/', 'https://raw.githubusercontent.com/' )
+    raw_url = raw_url.replace( '/blob/', '/' )
+    return raw_url;
+
+
+def readCode( regexp, source, confirm, relative, alldomains, result ):
+    str = ''
+    t_local_endpoints = []
+    url = getRawUrl( result )
+    # print( url )
+    code = doGetCode( url )
+    # print( code )
+
+    if code:
+        if source:
+            str = "\n%s>>> %s%s\n" % (fg('yellow'),result['html_url'],attr(0))
+        matches = re.findall( regexp, code )
+        # print(regexp)
+        # print(matches)
+        if matches:
+            for r in t_regexp:
+                edpt = re.findall( r, code )
+                if edpt:
+                    for endpoint in edpt:
+                        endpoint = endpoint.strip()
+                        if len(endpoint) >= MIN_LENGTH:
+                            goodbye = False
+                            for exclude in t_exclude:
+                                if re.match(exclude,endpoint):
+                                    goodbye = True
+                                    break
+                            if goodbye:
+                                continue
+                            if endpoint.startswith('http'):
+                                is_relative = False
+                            else:
+                                is_relative = True
+                            if not relative and is_relative:
+                                continue
+                            if endpoint in t_local_endpoints:
+                                continue
+                            if not source and endpoint in t_endpoints:
+                                continue
+                            if not alldomains and not is_relative:
+                                t_url_parse = urlparse( endpoint )
+                                t_host_parse = tldextract.extract( t_url_parse.netloc )
+                                domain = t_host_parse.domain
+                                sss = re.findall( regexp, t_url_parse.netloc )
+                                if not sss:
+                                    continue
+
+                            t_endpoints.append( endpoint )
+                            t_local_endpoints.append( endpoint )
+                            if source:
+                                str = str + ("%s\n" % endpoint)
+                            else:
+                                sys.stdout.write( "%s\n" % endpoint )
+
+    if source and len(t_local_endpoints):
+        sys.stdout.write( str )
+
+
+def doGetCode( url ):
+    # print( url )
+    try:
+        r = requests.get( url, timeout=5 )
+    except Exception as e:
+        sys.stdout.write( "%s[-] error occurred: %s%s\n" % (fg('red'),e,attr(0)) )
+        return False
+
+    return r.text
+
+
+parser = argparse.ArgumentParser()
+parser.add_argument( "-t","--token",help="auth token (required)" )
+parser.add_argument( "-d","--domain",help="domain you are looking for (required)" )
+parser.add_argument( "-e","--extend",help="also look for <dummy>example.com", action="store_true" )
+parser.add_argument( "-a","--all",help="displays urls from other domains", action="store_true" )
+parser.add_argument( "-r","--relative",help="also displays relative urls", action="store_true" )
+parser.add_argument( "-s","--source",help="display urls where endpoints are found", action="store_true" )
+parser.parse_args()
+args = parser.parse_args()
+
+t_tokens = []
+if args.token:
+    t_tokens = args.token.split(',')
+else:
+    if os.path.isfile(TOKENS_FILE):
+        fp = open(TOKENS_FILE,'r')
+        t_tokens = fp.read().split("\n")
+        fp.close()
+
+if not len(t_tokens):
+    parser.error( 'auth token is missing' )
+
+if args.source:
+    _source = True
+else:
+    _source = False
+
+if args.domain:
+    _domain = args.domain
+else:
+    parser.error( 'domain is missing' )
+
+if args.relative:
+    _relative = True
+else:
+    _relative = False
+
+if args.all:
+    _alldomains = True
+else:
+    _alldomains = False
+
+t_history = []
+page = 1
+_search = '"' + _domain + '"'
+
+### this is a test, looks like we got more result that way
+import tldextract
+t_host_parse = tldextract.extract( _domain )
+_search = '"' + t_host_parse.domain + '"'
+# print( t_host_parse )
+# exit()
+###
+
+# egrep -io "[0-9a-z_\-\.]+\.([0-9a-z_\-]+)?`echo $h|awk -F '.' '{print $(NF-1)}'`([0-9a-z_\-\.]+)?\.[a-z]{1,5}"
+
+
+if args.extend:
+    # _regexp = r'[0-9a-zA-Z_\-\.]+' + _domain.replace('.','\.')
+    _regexp = r'(([0-9a-z_\-\.]+\.)?([0-9a-z_\-]+)?'+t_host_parse.domain+'([0-9a-z_\-\.]+)?\.[a-z]{1,5})'
+    _confirm = t_host_parse.domain
+else:
+    _regexp = r'((([0-9a-zA-Z_\-\.]+)\.)?' + _domain.replace('.','\.')+')'
+    _confirm = _domain
+# print(_regexp)
+
+# for page in range(1,10):
+while True:
+    time.sleep( 1 )
+    t_json = githubApiSearchCode( _search, page )
+    # print(t_json)
+    page = page + 1
+
+    if not t_json or 'documentation_url' in t_json or not 'items' in t_json or not len(t_json['items']):
+        break
+
+    pool = Pool( 30 )
+    pool.map( partial(readCode,_regexp,_source,_confirm,_relative,_alldomains), t_json['items'] )
+    pool.close()
+    pool.join()
