@@ -112,8 +112,6 @@ def readCode( regexp, source, confirm, relative, alldomains, result ):
         if source:
             str = "\n%s>>> %s%s\n" % (fg('yellow'),result['html_url'],attr(0))
         matches = re.findall( regexp, code )
-        # print(regexp)
-        # print(matches)
         if matches:
             for r in t_regexp:
                 edpt = re.findall( r, code )
@@ -158,7 +156,6 @@ def readCode( regexp, source, confirm, relative, alldomains, result ):
 
 
 def doGetCode( url ):
-    # print( url )
     try:
         r = requests.get( url, timeout=5 )
     except Exception as e:
@@ -218,23 +215,16 @@ _search = '"' + _domain + '"'
 import tldextract
 t_host_parse = tldextract.extract( _domain )
 _search = '"' + t_host_parse.domain + '"'
-# print( t_host_parse )
-# exit()
 ###
-
-# egrep -io "[0-9a-z_\-\.]+\.([0-9a-z_\-]+)?`echo $h|awk -F '.' '{print $(NF-1)}'`([0-9a-z_\-\.]+)?\.[a-z]{1,5}"
 
 
 if args.extend:
-    # _regexp = r'[0-9a-zA-Z_\-\.]+' + _domain.replace('.','\.')
     _regexp = r'(([0-9a-z_\-\.]+\.)?([0-9a-z_\-]+)?'+t_host_parse.domain+'([0-9a-z_\-\.]+)?\.[a-z]{1,5})'
     _confirm = t_host_parse.domain
 else:
     _regexp = r'((([0-9a-zA-Z_\-\.]+)\.)?' + _domain.replace('.','\.')+')'
     _confirm = _domain
-# print(_regexp)
 
-# for page in range(1,10):
 while True:
     time.sleep( 1 )
     t_json = githubApiSearchCode( _search, page )
