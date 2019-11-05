@@ -17,8 +17,8 @@ from multiprocessing.dummy import Pool
 
 TOKENS_FILE = '.tokens'
 MIN_LENGTH = 5
-_url_chars = '[a-zA-Z0-9\-\.\?\#\$&%=_:/\]\[]'
-_not_url_chars = '[^a-zA-Z0-9\-\.\?\#\$&%=_:/\]\[]'
+_url_chars = '[a-zA-Z0-9\-\.\?\#\$&@%=_:/\]\[]'
+_not_url_chars = '[^a-zA-Z0-9\-\.\?\#\$&@%=_:/\]\[]'
 t_endpoints = []
 t_exclude = [
     r'^http://$',
