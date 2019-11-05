@@ -94,6 +94,7 @@ def githubApiSearchCode( url ):
             print( colored("[-] error occurred: %s" % json['documentation_url'], 'red') )
         else:
             t_results_urls[url] = json['total_count']
+            # print(json['total_count'])
     except Exception as e:
         print( colored("[-] error occurred: %s" % e, 'red') )
         return 0
@@ -128,6 +129,7 @@ for user in t_users:
     t_results[user] = []
     for dork in t_dorks:
         dork = 'user:' + user + ' ' + dork
+        # dork = '"' + dork + '"'
         url = 'https://api.github.com/search/code?q=' + __urlencode(dork)
         t_results[user].append( url )
         t_urls[url] = 0
