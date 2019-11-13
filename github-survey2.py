@@ -23,6 +23,8 @@ from multiprocessing.dummy import Pool
 
 
 ########### INIT
+TOKENS_FILE = os.path.dirname(os.path.realpath(__file__))+'/.tokens'
+
 parser = argparse.ArgumentParser()
 parser.add_argument( "-t","--token",help="auth token", action="append" )
 parser.add_argument( "-p","--page",help="n max page" )
@@ -40,9 +42,8 @@ if args.token:
     t_tokens = args.token
 else:
     t_tokens = []
-    tokens_file = os.path.dirname(os.path.realpath(__file__))+'/.tokens'
-    if os.path.isfile(tokens_file):
-        fp = open(tokens_file,'r')
+    if os.path.isfile(TOKENS_FILE):
+        fp = open(TOKENS_FILE,'r')
         for line in fp:
             r = re.search( '^([a-f0-9]{40})$', line )
             if r:

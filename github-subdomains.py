@@ -14,7 +14,8 @@ from functools import partial
 from colored import fg, bg, attr
 from multiprocessing.dummy import Pool
 
-TOKENS_FILE = '.tokens'
+
+TOKENS_FILE = os.path.dirname(os.path.realpath(__file__))+'/.tokens'
 
 
 def githubApiSearchCode( search, page ):

@@ -15,7 +15,7 @@ from functools import partial
 from colored import fg, bg, attr
 from multiprocessing.dummy import Pool
 
-TOKENS_FILE = '.tokens'
+TOKENS_FILE = os.path.dirname(os.path.realpath(__file__))+'/.tokens'
 MIN_LENGTH = 5
 _url_chars = '[a-zA-Z0-9\-\.\?\#\$&@%=_:/\]\[]'
 _not_url_chars = '[^a-zA-Z0-9\-\.\?\#\$&@%=_:/\]\[]'
