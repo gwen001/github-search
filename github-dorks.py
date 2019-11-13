@@ -14,7 +14,7 @@ import random
 from termcolor import colored
 from multiprocessing.dummy import Pool
 
-TOKENS_FILE = '.tokens'
+TOKENS_FILE = os.path.dirname(os.path.realpath(__file__))+'/.tokens'
 GITHUB_API_URL = 'https://api.github.com'
 
 parser = argparse.ArgumentParser()
