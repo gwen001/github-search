@@ -137,12 +137,15 @@ def readCode( regexp, source, confirm, relative, alldomains, result ):
                             if not source and endpoint in t_endpoints:
                                 continue
                             if not alldomains and not is_relative:
-                                t_url_parse = urlparse( endpoint )
-                                t_host_parse = tldextract.extract( t_url_parse.netloc )
-                                domain = t_host_parse.domain
-                                sss = re.findall( regexp, t_url_parse.netloc )
-                                if not sss:
-                                    continue
+                                try:
+                                    t_url_parse = urlparse( endpoint )
+                                    t_host_parse = tldextract.extract( t_url_parse.netloc )
+                                    domain = t_host_parse.domain
+                                    sss = re.findall( regexp, t_url_parse.netloc )
+                                    if not sss:
+                                        continue
+                                except Exception as e:
+                                    sys.stdout.write( "%s[-] error occurred: %s%s\n" % (fg('red'),e,attr(0)) )
 
                             t_endpoints.append( endpoint )
                             t_local_endpoints.append( endpoint )
