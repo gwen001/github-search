@@ -1,4 +1,4 @@
-#!/usr/bin/python3.5
+#!/usr/bin/python3
 
 # This script checks the date and the sha of the commits instead of the number of results
 # and also integrates the exclude list
