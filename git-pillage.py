@@ -1,4 +1,4 @@
-#!/usr/bin/python3.5
+#!/usr/bin/python3
 
 
 # inspired by https://github.com/koto/gitpillage/blob/master/gitpillage.sh

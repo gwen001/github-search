@@ -13,7 +13,7 @@ if [ ${keyword:0:2} == "k_" ] ; then
 	k=${keyword:2}
 	kf=~/.gf/$k.json
 	if [ -f $kf ] ; then
-		tmp=`cat $kf | grep '"patterns"'`
+		tmp=`cat $kf | egrep '"patterns"'`
 		if [ -n "$tmp" ] ; then
 			t_keywords=(`cat $kf | jq '.patterns | .[]'`)
 		else
@@ -86,7 +86,7 @@ for r in $lrepo ; do
 				keyword=${t_keywords[$i]}
 				# echo $keyword
 
-				echo $content | egrep --color -oa ".{0,50}$keyword.{0,50}"
+				echo $content | egrep --color -Ioa ".{0,50}$keyword.{0,50}"
 				# git cat-file -p $obj | egrep --color -oa ".{0,50}$keyword.{0,50}"
 
 				# {
