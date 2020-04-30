@@ -101,20 +101,26 @@ def getRawUrl( result ):
 
 
 def readCode( regexp, source, confirm, relative, alldomains, result ):
+
+    time.sleep( random.random() )
+
+    url = getRawUrl( result )
+    if url in t_history_urls:
+        return
+
     str = ''
     t_local_endpoints = []
-    url = getRawUrl( result )
-    # print( url )
+    t_history_urls.append( url )
     code = doGetCode( url )
     # print( code )
 
     if code:
         if source:
-            str = "\n%s>>> %s%s\n" % (fg('yellow'),result['html_url'],attr(0))
-        matches = re.findall( regexp, code )
+            str = "\n%s>>> %s%s\n\n" % (fg('yellow'),result['html_url'],attr(0))
+        matches = re.findall( regexp, code, re.IGNORECASE )
         if matches:
             for r in t_regexp:
-                edpt = re.findall( r, code )
+                edpt = re.findall( r, code, re.IGNORECASE )
                 if edpt:
                     for endpoint in edpt:
                         endpoint = endpoint.strip()
@@ -211,13 +217,19 @@ else:
     _alldomains = False
 
 t_history = []
+t_history_urls = []
 page = 1
 _search = '"' + _domain + '"'
 
 ### this is a test, looks like we got more result that way
 import tldextract
 t_host_parse = tldextract.extract( _domain )
+# which one is
 _search = '"' + t_host_parse.domain + '"'
+# the most effective ?
+_search = '"' + t_host_parse.domain + '.' + t_host_parse.suffix + '"'
+# or simply
+# _search = '"' + _domain + '"'
 ###
 
 
@@ -225,17 +237,23 @@ if args.extend:
     _regexp = r'(([0-9a-z_\-\.]+\.)?([0-9a-z_\-]+)?'+t_host_parse.domain+'([0-9a-z_\-\.]+)?\.[a-z]{1,5})'
     _confirm = t_host_parse.domain
 else:
-    _regexp = r'((([0-9a-zA-Z_\-\.]+)\.)?' + _domain.replace('.','\.')+')'
+    _regexp = r'((([0-9a-z_\-\.]+)\.)?' + _domain.replace('.','\.')+')'
     _confirm = _domain
 
+stop = 0
+# for page in range(1,10):
 while True:
-    time.sleep( 1 )
+
+    time.sleep( random.random() )
     t_json = githubApiSearchCode( _search, page )
     # print(t_json)
     page = page + 1
 
     if not t_json or 'documentation_url' in t_json or not 'items' in t_json or not len(t_json['items']):
-        break
+        stop = stop + 1
+        if stop == 3:
+            break
+        continue
 
     pool = Pool( 30 )
     pool.map( partial(readCode,_regexp,_source,_confirm,_relative,_alldomains), t_json['items'] )
