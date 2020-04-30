@@ -39,7 +39,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument( "-p","--path",help="path to scan" )
 parser.add_argument( "-d","--date",help="do no check commits prior this date, format: YYYY-MM-DD" )
 parser.add_argument( "-c","--length",help="only check in first n characters" )
-parser.add_argument( "-s","--search",help="term to search (regexp)" )
+parser.add_argument( "-r","--regexp",help="regexp to search (can be a tomnomnom gf file)" )
 parser.add_argument( "-t","--threads",help="max threads, default: 10" )
 parser.parse_args()
 args = parser.parse_args()
@@ -75,10 +75,10 @@ else:
     # max_length = 1000
 
 t_regexp = []
-if args.search:
-    if os.path.isfile(args.search):
-        sys.stdout.write( '%s[+] loading regexp: %s%s\n' %  (fg('green'),args.search,attr(0)) )
-        with open(args.search) as json_file:
+if args.regexp:
+    if os.path.isfile(args.regexp):
+        sys.stdout.write( '%s[+] loading regexp: %s%s\n' %  (fg('green'),args.regexp,attr(0)) )
+        with open(args.regexp) as json_file:
             data = json.load(json_file)
         if 'pattern' in data:
             t_regexp.append( data['pattern'] )
@@ -86,13 +86,13 @@ if args.search:
             for r in data['patterns']:
                 t_regexp.append( r )
     else:
-        t_regexp.append( args.search )
+        t_regexp.append( args.regexp )
 else:
-    parser.error( 'search term is missing' )
+    parser.error( 'regexp is missing' )
 
 l_regexp = len(t_regexp)
 if not l_regexp:
-    parser.error( 'search term is missing' )
+    parser.error( 'regexp is missing' )
 
 t_regexp_compiled = []
 for regexp in t_regexp:

@@ -39,23 +39,39 @@ def getRawUrl( result ):
     return raw_url;
 
 
-def readCode( regexp, source, result ):
+def readCode( domain_regexp, source, result ):
+
+    time.sleep( random.random() )
+
     url = getRawUrl( result )
+    # print(url)
+    if url in t_history_urls:
+        return
+
+    output = ''
+    t_history_urls.append( url )
     code = doGetCode( url )
-    # print(code)
+    t_local_history = []
+    # sys.stdout.write( ">>> calling %s\n" % url )
     
     if code:
-        matches = re.findall( regexp, code )
+        matches = re.findall( domain_regexp, code, re.IGNORECASE )
         if matches:
             for sub in  matches:
-                # print(sub)
                 sub = sub[0].replace('2F','').lower().strip()
-                if len(sub) and not sub in t_history:
-                    t_history.append( sub )
-                    sys.stdout.write( "%s" % sub )
+                if len(sub) and not sub in t_local_history:
+                    t_local_history.append(sub)
                     if source:
-                        sys.stdout.write( "\t-> %s" % result['html_url'] )
-                    sys.stdout.write( "\n" )
+                        if not len(output):
+                            output = output + ("%s>>> %s%s\n\n" % (fg('yellow'),result['html_url'],attr(0)) )
+                        t_history.append( sub )
+                        output = output + ("%s\n" % sub)
+                    elif not sub in t_history:
+                        t_history.append( sub )
+                        output = output + ("%s\n" % sub)
+    
+    if len(output.strip()):
+        sys.stdout.write( "%s\n" % output )
 
 
 def doGetCode( url ):
@@ -100,13 +116,19 @@ else:
     parser.error( 'domain is missing' )
 
 t_history = []
+t_history_urls = []
 page = 1
 _search = '"' + _domain + '"'
 
 ### this is a test, looks like we got more result that way
 import tldextract
 t_host_parse = tldextract.extract( _domain )
+# which one is
 _search = '"' + t_host_parse.domain + '"'
+# the most effective ?
+_search = '"' + t_host_parse.domain + '.' + t_host_parse.suffix + '"'
+# or simply
+# _search = '"' + _domain + '"'
 # print( t_host_parse )
 # exit()
 ###
@@ -115,23 +137,28 @@ _search = '"' + t_host_parse.domain + '"'
 
 
 if args.extend:
-    # _regexp = r'[0-9a-zA-Z_\-\.]+' + _domain.replace('.','\.')
-    _regexp = r'([0-9a-z_\-\.]+\.([0-9a-z_\-]+)?'+t_host_parse.domain+'([0-9a-z_\-\.]+)?\.[a-z]{1,5})'
+    # domain_regexp = r'[0-9a-zA-Z_\-\.]+' + _domain.replace('.','\.')
+    domain_regexp = r'([0-9a-z_\-\.]+\.([0-9a-z_\-]+)?'+t_host_parse.domain+'([0-9a-z_\-\.]+)?\.[a-z]{1,5})'
 else:
-    _regexp = r'(([0-9a-zA-Z_\-\.]+)\.' + _domain.replace('.','\.')+')'
-# print(_regexp)
+    domain_regexp = r'(([0-9a-z_\-\.]+)\.' + _domain.replace('.','\.')+')'
+# print(domain_regexp)
 
+stop = 0
 # for page in range(1,10):
 while True:
-    time.sleep( 1 )
+
+    time.sleep( random.random() )
     t_json = githubApiSearchCode( _search, page )
     # print(t_json)
     page = page + 1
 
     if not t_json or 'documentation_url' in t_json or not 'items' in t_json or not len(t_json['items']):
-        break
+        stop = stop + 1
+        if stop == 3:
+            break
+        continue
 
     pool = Pool( 30 )
-    pool.map( partial(readCode,_regexp,_source), t_json['items'] )
+    pool.map( partial(readCode,domain_regexp,_source), t_json['items'] )
     pool.close()
     pool.join()
