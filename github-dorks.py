@@ -1,4 +1,4 @@
-#!/usr/bin/python2.7
+#!/usr/bin/python2
 
 # I don't believe in license.
 # You can do whatever you want with this program.
@@ -84,7 +84,7 @@ def githubApiSearchCode( url ):
     # print(i)
     headers = {"Authorization": "token "+t_tokens[i]}
     # print(headers)
-    
+
     try:
         r = requests.get( url, headers=headers, timeout=5 )
         json = r.json()

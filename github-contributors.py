@@ -1,4 +1,4 @@
-#!/usr/bin/python2.7
+#!/usr/bin/python2
 
 # I don't believe in license.
 # You can do whatever you want with this program.
@@ -152,7 +152,7 @@ def grabUserHtmlLight( ghaccount, login ):
             o = r_org.group(1).lower()[:20]
             if o not in ghaccount['orgs']:
                 ghaccount['orgs'].append( o )
-        
+
         r_org = re.search( 'aria-label="Organization: ([^"]*)"', r.text, re.MULTILINE|re.IGNORECASE )
         if r_org:
             o = r_org.group(1).lower()[:20]
@@ -191,7 +191,7 @@ def doGrabUser( login ):
             orgs = ','.join(r['orgs'])
         else:
             orgs = ''
-        
+
         collab = {}
         collab['login'] = login
         collab['n_collab'] = t_collab[login]

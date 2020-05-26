@@ -1,4 +1,4 @@
-#!/usr/bin/python2.7
+#!/usr/bin/python2
 
 # I don't believe in license.
 # You can do whatever you want with this program.
@@ -115,7 +115,7 @@ def doCheckCommit( commit ):
 
     if t_stats['getout'] or t_stats['skip_repo']:
         return
-    
+
     sys.stdout.write( 'progress: %d/%d\r' %  (t_stats['n_current'],t_stats['n_commit']) )
     sys.stdout.flush()
     t_stats['n_current'] = t_stats['n_current'] + 1
@@ -172,7 +172,7 @@ t_stats = {
 for repo in t_repo:
     if t_stats['getout']:
         exit()
-    
+
     repo = repo.replace('.git','')
     sys.stdout.write( '%s[+] %s%s\n' %  (fg('cyan'),repo,attr(0)) )
 

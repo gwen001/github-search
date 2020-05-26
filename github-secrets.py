@@ -23,7 +23,7 @@ TOKENS_FILE = os.path.dirname(os.path.realpath(__file__))+'/.tokens'
 def githubApiSearchCode( search, page ):
     headers = {"Authorization":"token "+random.choice(t_tokens)}
     url = 'https://api.github.com/search/code?s=indexed&type=Code&o=desc&q=' + search + '&page=' + str(page)
-    # print(url)
+    # print(">>> "+url)
     
     try:
         r = requests.get( url, headers=headers, timeout=5 )
@@ -151,7 +151,7 @@ while True:
 
     time.sleep( random.random() )
     t_json = githubApiSearchCode( _search_encoded, page )
-    # print(page)
+    print("page %s"%page)
     page = page + 1
 
     if not t_json or 'documentation_url' in t_json or not 'items' in t_json or not len(t_json['items']):
@@ -159,8 +159,12 @@ while True:
         if stop == 3:
             break
         continue
-
+    
     pool = Pool( 30 )
     pool.map( partial(readCode,search_regexp,t_regexp), t_json['items'] )
     pool.close()
     pool.join()
+
+    exit()
+
+
