@@ -22,7 +22,7 @@ def githubApiSearchCode( search, page ):
     headers = {"Authorization":"token "+random.choice(t_tokens)}
     url = 'https://api.github.com/search/code?s=indexed&type=Code&o=desc&q=' + search + '&page=' + str(page)
     # print(url)
-    
+
     try:
         r = requests.get( url, headers=headers, timeout=5 )
         json = r.json()
@@ -53,7 +53,7 @@ def readCode( domain_regexp, source, result ):
     code = doGetCode( url )
     t_local_history = []
     # sys.stdout.write( ">>> calling %s\n" % url )
-    
+
     if code:
         matches = re.findall( domain_regexp, code, re.IGNORECASE )
         if matches:
@@ -69,7 +69,7 @@ def readCode( domain_regexp, source, result ):
                     elif not sub in t_history:
                         t_history.append( sub )
                         output = output + ("%s\n" % sub)
-    
+
     if len(output.strip()):
         sys.stdout.write( "%s\n" % output )
 
@@ -123,10 +123,14 @@ _search = '"' + _domain + '"'
 ### this is a test, looks like we got more result that way
 import tldextract
 t_host_parse = tldextract.extract( _domain )
-# which one is
-_search = '"' + t_host_parse.domain + '"'
-# the most effective ?
-_search = '"' + t_host_parse.domain + '.' + t_host_parse.suffix + '"'
+
+if args.extend:
+    # which one is
+    _search = '"' + t_host_parse.domain + '"'
+else:
+    # the most effective ?
+    _search = '"' + t_host_parse.domain + '.' + t_host_parse.suffix + '"'
+
 # or simply
 # _search = '"' + _domain + '"'
 # print( t_host_parse )
