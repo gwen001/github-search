@@ -123,7 +123,6 @@ t_sort_order = [
 
 t_history = []
 t_history_urls = []
-page = 1
 _search = '"' + _domain + '"'
 
 ### this is a test, looks like we got more result that way
@@ -156,10 +155,13 @@ else:
 
 for so in t_sort_order:
 
-    # print( '--------- %s %s\n' % (so['sort'],so['order']) )
+    page = 1
+    print( '--------- %s %s\n' % (so['sort'],so['order']) )
 
     # for page in range(1,10):
     while True:
+
+        # print("page %d" % page)
         time.sleep( random.random() )
         token = random.choice( t_tokens )
         t_json = githubApiSearchCode( token, _search, page, so['sort'], so['order'] )
