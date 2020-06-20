@@ -19,6 +19,8 @@ filename:git-credentials
 filename:id_dsa
 filename:id_rsa
 extension:env
+extension:exs
+extension:sls
 extension:cfg
 extension:ini
 language:yaml -filename:travis
@@ -53,6 +55,9 @@ filename:server.cfg
 filename:shadow
 filename:sshd_config
 filename:known_hosts
+filename:beanstalkd.yml
+filename:deploy.rake
+filename:composer.json
 
 staging
 stg
@@ -81,6 +86,8 @@ passwd
 pass
 pwd
 pwds
+ftp
+mysql
 root_password
 credentials
 security_credentials
@@ -122,6 +129,7 @@ auth
 secure
 login
 conn.login
+ssh
 sshpass
 ssh2_auth_password
 irc_pass
@@ -155,3 +163,8 @@ stripe
 herokuapp
 cloudfront
 amazonaws
+npmrc _auth
+pem private
+aws_access_key_id
+bashrc password
+xoxp OR xoxb OR xoxa
