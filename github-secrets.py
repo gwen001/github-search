@@ -171,12 +171,13 @@ for so in t_sort_order:
         token = random.choice( t_tokens )
         t_json = githubApiSearchCode( token, _search_encoded, page, so['sort'], so['order'] )
         # print(t_json)
-        page = page + 1
 
         if not t_json or 'documentation_url' in t_json:
             t_tokens.remove(token)
             if len(t_tokens) == 0:
                 exit()
+
+        page = page + 1
 
         if 'items' in t_json and len(t_json['items']):
             pool = Pool( 30 )
