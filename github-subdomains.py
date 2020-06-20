@@ -21,7 +21,7 @@ TOKENS_FILE = os.path.dirname(os.path.realpath(__file__))+'/.tokens'
 def githubApiSearchCode( token, search, page, sort, order ):
     headers = { "Authorization":"token "+token }
     url = 'https://api.github.com/search/code?s=' + sort + '&type=Code&o=' + order + '&q=' + search + '&page=' + str(page)
-    # print(url)
+    # print(">>> "+url)
 
     try:
         r = requests.get( url, headers=headers, timeout=5 )
@@ -156,7 +156,7 @@ else:
 for so in t_sort_order:
 
     page = 1
-    print( '--------- %s %s\n' % (so['sort'],so['order']) )
+    # print( '--------- %s %s\n' % (so['sort'],so['order']) )
 
     # for page in range(1,10):
     while True:

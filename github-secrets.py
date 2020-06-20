@@ -20,11 +20,11 @@ from multiprocessing.dummy import Pool
 TOKENS_FILE = os.path.dirname(os.path.realpath(__file__))+'/.tokens'
 
 
-def githubApiSearchCode( search, page ):
-    headers = {"Authorization":"token "+random.choice(t_tokens)}
-    url = 'https://api.github.com/search/code?s=indexed&type=Code&o=desc&q=' + search + '&page=' + str(page)
+def githubApiSearchCode( token, search, page, sort, order ):
+    headers = { "Authorization":"token "+token }
+    url = 'https://api.github.com/search/code?s=' + sort + '&type=Code&o=' + order + '&q=' + search + '&page=' + str(page)
     # print(">>> "+url)
-    
+
     try:
         r = requests.get( url, headers=headers, timeout=5 )
         json = r.json()
@@ -35,10 +35,10 @@ def githubApiSearchCode( search, page ):
 
 
 def getRawUrl( result ):
-    raw_url = result['html_url'];
+    raw_url = result['html_url']
     raw_url = raw_url.replace( 'https://github.com/', 'https://raw.githubusercontent.com/' )
     raw_url = raw_url.replace( '/blob/', '/' )
-    return raw_url;
+    return raw_url
 
 
 def readCode( search_regexp, t_regexp, result ):
@@ -54,10 +54,10 @@ def readCode( search_regexp, t_regexp, result ):
     code = doGetCode( url )
     t_local_history = []
     # sys.stdout.write( ">>> calling %s\n" % url )
-    
+
     if not code:
         return False
-    
+
     search_matches = re.findall( search_regexp, code )
 
     if search_matches:
@@ -73,9 +73,14 @@ def readCode( search_regexp, t_regexp, result ):
 
         if r:
             if not len(output):
-                output = output + ("%s>>> %s%s\n\n" % (fg('yellow'),result['html_url'],attr(0)) )
-            for rr in r:
-                output = output + ('%s%s%s'%(fg(color),rr[0].lstrip(),attr(0))) + ('%s%s%s'%(fg(regexp_color),rr[1],attr(0))) + ('%s%s%s'%(fg(color),rr[-1].rstrip(),attr(0))) + "\n"
+                if args.url:
+                    output = output + ("%s" % result['html_url'] )
+                    # output = output + ("%s" % url )
+                else:
+                    output = output + ("%s>>> %s%s\n\n" % (fg('yellow'),result['html_url'],attr(0)) )
+            if not args.url:
+                for rr in r:
+                    output = output + ('%s%s%s'%(fg(color),rr[0].lstrip(),attr(0))) + ('%s%s%s'%(fg(regexp_color),rr[1],attr(0))) + ('%s%s%s'%(fg(color),rr[-1].rstrip(),attr(0))) + "\n"
 
     if len(output.strip()):
         sys.stdout.write( "%s\n" % output )
@@ -97,6 +102,7 @@ parser.add_argument( "-t","--token",help="auth token (required)" )
 parser.add_argument( "-s","--search",help="search term you are looking for (required)" )
 parser.add_argument( "-e","--extend",help="also look for <dummy>example.com", action="store_true" )
 parser.add_argument( "-r","--regexp",help="regexp to search, default is SecLists secret-keywords list (can be a tomnomnom gf file)" )
+parser.add_argument( "-u","--url",help="display only url", action="store_true" )
 parser.parse_args()
 args = parser.parse_args()
 
@@ -141,30 +147,41 @@ t_regexp_compiled = []
 for regexp in t_regexp:
     t_regexp_compiled.append( re.compile(r'(.{0,100})('+regexp+')(.{0,100})', re.IGNORECASE) )
 
-stop = 0
-page = 1
+t_sort_order = [
+    { 'sort':'indexed', 'order':'desc',  },
+    { 'sort':'indexed', 'order':'asc',  },
+    { 'sort':'', 'order':'desc',  }
+]
+
 search_regexp = re.compile(r''+_search+'', re.IGNORECASE)
+
 t_history = []
 t_history_urls = []
 
-while True:
+for so in t_sort_order:
 
-    time.sleep( random.random() )
-    t_json = githubApiSearchCode( _search_encoded, page )
-    print("page %s"%page)
-    page = page + 1
+    page = 1
+    # print( '--------- %s %s\n' % (so['sort'],so['order']) )
 
-    if not t_json or 'documentation_url' in t_json or not 'items' in t_json or not len(t_json['items']):
-        stop = stop + 1
-        if stop == 3:
+    # for page in range(1,10):
+    while True:
+
+        # print("page %d" % page)
+        time.sleep( random.random() )
+        token = random.choice( t_tokens )
+        t_json = githubApiSearchCode( token, _search_encoded, page, so['sort'], so['order'] )
+        # print(t_json)
+        page = page + 1
+
+        if not t_json or 'documentation_url' in t_json:
+            t_tokens.remove(token)
+            if len(t_tokens) == 0:
+                exit()
+
+        if 'items' in t_json and len(t_json['items']):
+            pool = Pool( 30 )
+            pool.map( partial(readCode,search_regexp,t_regexp), t_json['items'] )
+            pool.close()
+            pool.join()
+        else:
             break
-        continue
-    
-    pool = Pool( 30 )
-    pool.map( partial(readCode,search_regexp,t_regexp), t_json['items'] )
-    pool.close()
-    pool.join()
-
-    exit()
-
-
