@@ -18,9 +18,9 @@ from multiprocessing.dummy import Pool
 TOKENS_FILE = os.path.dirname(os.path.realpath(__file__))+'/.tokens'
 
 
-def githubApiSearchCode( search, page ):
-    headers = {"Authorization":"token "+random.choice(t_tokens)}
-    url = 'https://api.github.com/search/code?s=indexed&type=Code&o=desc&q=' + search + '&page=' + str(page)
+def githubApiSearchCode( token, search, page, sort, order ):
+    headers = { "Authorization":"token "+token }
+    url = 'https://api.github.com/search/code?s=' + sort + '&type=Code&o=' + order + '&q=' + search + '&page=' + str(page)
     # print(url)
 
     try:
@@ -71,7 +71,7 @@ def readCode( domain_regexp, source, result ):
                         output = output + ("%s\n" % sub)
 
     if len(output.strip()):
-        sys.stdout.write( "%s\n" % output )
+        sys.stdout.write( "%s\n" % output.strip() )
 
 
 def doGetCode( url ):
@@ -115,6 +115,12 @@ if args.domain:
 else:
     parser.error( 'domain is missing' )
 
+t_sort_order = [
+    { 'sort':'indexed', 'order':'desc',  },
+    { 'sort':'indexed', 'order':'asc',  },
+    { 'sort':'', 'order':'desc',  }
+]
+
 t_history = []
 t_history_urls = []
 page = 1
@@ -147,22 +153,29 @@ else:
     domain_regexp = r'(([0-9a-z_\-\.]+)\.' + _domain.replace('.','\.')+')'
 # print(domain_regexp)
 
-stop = 0
-# for page in range(1,10):
-while True:
 
-    time.sleep( random.random() )
-    t_json = githubApiSearchCode( _search, page )
-    # print(t_json)
-    page = page + 1
+for so in t_sort_order:
 
-    if not t_json or 'documentation_url' in t_json or not 'items' in t_json or not len(t_json['items']):
-        stop = stop + 1
-        if stop == 3:
+    # print( '--------- %s %s\n' % (so['sort'],so['order']) )
+
+    # for page in range(1,10):
+    while True:
+        time.sleep( random.random() )
+        token = random.choice( t_tokens )
+        t_json = githubApiSearchCode( token, _search, page, so['sort'], so['order'] )
+        # print(t_json)
+        page = page + 1
+
+        if not t_json or 'documentation_url' in t_json:
+            t_tokens.remove(token)
+            if len(t_tokens) == 0:
+                exit()
+
+        if 'items' in t_json and len(t_json['items']):
+            pool = Pool( 30 )
+            pool.map( partial(readCode,domain_regexp,_source), t_json['items'] )
+            pool.close()
+            pool.join()
+        else:
             break
-        continue
 
-    pool = Pool( 30 )
-    pool.map( partial(readCode,domain_regexp,_source), t_json['items'] )
-    pool.close()
-    pool.join()
