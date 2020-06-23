@@ -103,6 +103,7 @@ parser.add_argument( "-s","--search",help="search term you are looking for (requ
 parser.add_argument( "-e","--extend",help="also look for <dummy>example.com", action="store_true" )
 parser.add_argument( "-r","--regexp",help="regexp to search, default is SecLists secret-keywords list (can be a tomnomnom gf file)" )
 parser.add_argument( "-u","--url",help="display only url", action="store_true" )
+parser.add_argument( "-v","--verbose",help="verbose mode, for debugging purpose", action="store_true" )
 parser.parse_args()
 args = parser.parse_args()
 
@@ -161,21 +162,27 @@ t_history_urls = []
 for so in t_sort_order:
 
     page = 1
-    # print( '--------- %s %s\n' % (so['sort'],so['order']) )
 
-    # for page in range(1,10):
+    if args.verbose:
+        print( '\n--------- %s %s\n' % (so['sort'],so['order']) )
+
     while True:
 
-        # print("page %d" % page)
+        if args.verbose:
+            print("page %d" % page)
+
         time.sleep( random.random() )
         token = random.choice( t_tokens )
         t_json = githubApiSearchCode( token, _search_encoded, page, so['sort'], so['order'] )
         # print(t_json)
 
         if not t_json or 'documentation_url' in t_json:
+            if args.verbose:
+                print(t_json)
             t_tokens.remove(token)
             if len(t_tokens) == 0:
                 exit()
+            continue
 
         page = page + 1
 

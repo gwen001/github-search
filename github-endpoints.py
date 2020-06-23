@@ -184,6 +184,7 @@ parser.add_argument( "-e","--extend",help="also look for <dummy>example.com", ac
 parser.add_argument( "-a","--all",help="displays urls of all other domains", action="store_true" )
 parser.add_argument( "-r","--relative",help="also displays relative urls", action="store_true" )
 parser.add_argument( "-s","--source",help="display urls where endpoints are found", action="store_true" )
+parser.add_argument( "-v","--verbose",help="verbose mode, for debugging purpose", action="store_true" )
 parser.parse_args()
 args = parser.parse_args()
 
@@ -254,24 +255,37 @@ else:
     _regexp = r'((([0-9a-z_\-\.]+)\.)?' + _domain.replace('.','\.')+')'
     _confirm = _domain
 
+if args.verbose:
+    print( "Search: %s" % _search )
+    print( "Regexp: %s" % _regexp)
+    print( "Confirm: %s" % readCode)
+# print()
+# exit()
+
 for so in t_sort_order:
 
     page = 1
-    # print( '--------- %s %s\n' % (so['sort'],so['order']) )
 
-    # for page in range(1,10):
+    if args.verbose:
+        print( '\n--------- %s %s\n' % (so['sort'],so['order']) )
+
     while True:
 
-        # print("page %d" % page)
+        if args.verbose:
+            print("page %d" % page)
+
         time.sleep( random.random() )
         token = random.choice( t_tokens )
         t_json = githubApiSearchCode( token, _search, page, so['sort'], so['order'] )
         # print(t_json)
 
         if not t_json or 'documentation_url' in t_json:
+            if args.verbose:
+                print(t_json)
             t_tokens.remove(token)
             if len(t_tokens) == 0:
                 exit()
+            continue
 
         page = page + 1
 
