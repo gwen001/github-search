@@ -181,7 +181,7 @@ for so in t_sort_order:
         if 'items' in t_json and len(t_json['items']):
             # print('page: %d , %d results' % (page,len(t_json['items'])) )
             # continue
-            pool = Pool( 20 )
+            pool = Pool( 30 )
             pool.map( partial(readCode,domain_regexp,_source), t_json['items'] )
             pool.close()
             pool.join()
