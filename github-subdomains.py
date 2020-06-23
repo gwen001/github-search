@@ -20,7 +20,7 @@ TOKENS_FILE = os.path.dirname(os.path.realpath(__file__))+'/.tokens'
 
 def githubApiSearchCode( token, search, page, sort, order ):
     headers = { "Authorization":"token "+token }
-    url = 'https://api.github.com/search/code?s=' + sort + '&type=Code&o=' + order + '&q=' + search + '&page=' + str(page)
+    url = 'https://api.github.com/search/code?per_page=100&s=' + sort + '&type=Code&o=' + order + '&q=' + search + '&page=' + str(page)
     # print(">>> "+url)
 
     try:
@@ -136,6 +136,7 @@ else:
     # the most effective ?
     _search = '"' + t_host_parse.domain + '.' + t_host_parse.suffix + '"'
 
+_search = _search.replace('-','%2D')
 # or simply
 # _search = '"' + _domain + '"'
 # print( t_host_parse )
@@ -175,10 +176,11 @@ for so in t_sort_order:
             if len(t_tokens) == 0:
                 exit()
 
+        page = page + 1
 
         if 'items' in t_json and len(t_json['items']):
             # print('page: %d , %d results' % (page,len(t_json['items'])) )
-            # page = page + 1
+            # continue
             pool = Pool( 30 )
             pool.map( partial(readCode,domain_regexp,_source), t_json['items'] )
             pool.close()

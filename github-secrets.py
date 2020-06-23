@@ -22,7 +22,7 @@ TOKENS_FILE = os.path.dirname(os.path.realpath(__file__))+'/.tokens'
 
 def githubApiSearchCode( token, search, page, sort, order ):
     headers = { "Authorization":"token "+token }
-    url = 'https://api.github.com/search/code?s=' + sort + '&type=Code&o=' + order + '&q=' + search + '&page=' + str(page)
+    url = 'https://api.github.com/search/code?per_page=100&s=' + sort + '&type=Code&o=' + order + '&q=' + search + '&page=' + str(page)
     # print(">>> "+url)
 
     try:
