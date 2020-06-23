@@ -276,7 +276,7 @@ for so in t_sort_order:
         page = page + 1
 
         if 'items' in t_json and len(t_json['items']):
-            pool = Pool( 30 )
+            pool = Pool( 20 )
             pool.map( partial(readCode,_regexp,_source,_confirm,_relative,_alldomains), t_json['items'] )
             pool.close()
             pool.join()
