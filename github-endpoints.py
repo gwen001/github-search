@@ -259,15 +259,13 @@ if args.verbose:
     print( "Search: %s" % _search )
     print( "Regexp: %s" % _regexp)
     print( "Confirm: %s" % readCode)
-# print()
-# exit()
 
 for so in t_sort_order:
 
     page = 1
 
     if args.verbose:
-        print( '\n--------- %s %s\n' % (so['sort'],so['order']) )
+        print( '\n----- %s %s\n' % (so['sort'],so['order']) )
 
     while True:
 
