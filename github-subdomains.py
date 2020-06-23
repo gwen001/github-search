@@ -150,13 +150,16 @@ if args.extend:
     domain_regexp = r'([0-9a-z_\-\.]+\.([0-9a-z_\-]+)?'+t_host_parse.domain+'([0-9a-z_\-\.]+)?\.[a-z]{1,5})'
 else:
     domain_regexp = r'(([0-9a-z_\-\.]+)\.' + _domain.replace('.','\.')+')'
-# print(domain_regexp)
 
+# print( "Search: %s" % _search )
+# print( "Regexp: %s" % domain_regexp)
+# print()
+# exit()
 
 for so in t_sort_order:
 
     page = 1
-    # print( '--------- %s %s\n' % (so['sort'],so['order']) )
+    # print( '\n--------- %s %s\n' % (so['sort'],so['order']) )
 
     # for page in range(1,10):
     while True:
@@ -172,9 +175,10 @@ for so in t_sort_order:
             if len(t_tokens) == 0:
                 exit()
 
-        page = page + 1
 
         if 'items' in t_json and len(t_json['items']):
+            # print('page: %d , %d results' % (page,len(t_json['items'])) )
+            # page = page + 1
             pool = Pool( 30 )
             pool.map( partial(readCode,domain_regexp,_source), t_json['items'] )
             pool.close()
