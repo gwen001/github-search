@@ -15,7 +15,7 @@ from multiprocessing.dummy import Pool
 TOKENS_FILE = os.path.dirname(os.path.realpath(__file__))+'/.tokens'
 
 parser = argparse.ArgumentParser()
-parser.add_argument( "-t","--token",help="auth token" )
+parser.add_argument( "-t","--token",help="your github token" )
 parser.add_argument( "-k","--keyword",help="keyword to search" )
 parser.parse_args()
 args = parser.parse_args()
@@ -127,7 +127,7 @@ def grabUserHtmlLight( ghaccount, login ):
             o = r_org.group(1).lower()[:20]
             if o not in ghaccount['orgs']:
                 ghaccount['orgs'].append( o )
-        
+
         r_org = re.search( 'aria-label="Organization: ([^"]*)"', r.text, re.MULTILINE|re.IGNORECASE )
         if r_org:
             o = r_org.group(1).lower()[:20]

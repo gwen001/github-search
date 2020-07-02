@@ -20,7 +20,7 @@ TOKENS_FILE = os.path.dirname(os.path.realpath(__file__))+'/.tokens'
 GITHUB_API_URL = 'https://api.github.com'
 
 parser = argparse.ArgumentParser()
-parser.add_argument( "-t","--token",help="auth token" )
+parser.add_argument( "-t","--token",help="your github token" )
 parser.add_argument( "-o","--org",help="organization" )
 parser.add_argument( "-u","--user",help="user" )
 parser.parse_args()

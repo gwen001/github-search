@@ -98,7 +98,7 @@ def doGetCode( url ):
 
 
 parser = argparse.ArgumentParser()
-parser.add_argument( "-t","--token",help="auth token (required)" )
+parser.add_argument( "-t","--token",help="your github token (required)" )
 parser.add_argument( "-s","--search",help="search term you are looking for (required)" )
 parser.add_argument( "-e","--extend",help="also look for <dummy>example.com", action="store_true" )
 parser.add_argument( "-r","--regexp",help="regexp to search, default is SecLists secret-keywords list (can be a tomnomnom gf file)" )

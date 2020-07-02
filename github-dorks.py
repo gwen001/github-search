@@ -19,7 +19,7 @@ GITHUB_API_URL = 'https://api.github.com'
 
 parser = argparse.ArgumentParser()
 parser.add_argument( "-d","--dorks",help="dorks file (required)" )
-parser.add_argument( "-t","--token",help="auth token (required)" )
+parser.add_argument( "-t","--token",help="your github token (required)" )
 parser.add_argument( "-o","--org",help="organization (required or -u)" )
 parser.add_argument( "-e","--threads",help="maximum n threads, default 1" )
 parser.add_argument( "-u","--user",help="user (required or -o)" )

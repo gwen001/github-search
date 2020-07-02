@@ -26,7 +26,7 @@ from multiprocessing.dummy import Pool
 TOKENS_FILE = os.path.dirname(os.path.realpath(__file__))+'/.tokens'
 
 parser = argparse.ArgumentParser()
-parser.add_argument( "-t","--token",help="auth token", action="append" )
+parser.add_argument( "-t","--token",help="your github token", action="append" )
 parser.add_argument( "-p","--page",help="n max page" )
 parser.add_argument( "-c","--config",help="config file, default: ~/.config/github-survey.json" )
 parser.parse_args()
@@ -167,14 +167,14 @@ def mergeExclude( t_global_exclude, t_dork ):
 
     if not 'exclude' in t_dork:
         return t_exclude
-    
+
     if 'filepath' in t_dork['exclude']:
         t_exclude['filepath'] = t_exclude['filepath'] + t_dork['exclude']['filepath']
     if 'filepath' in t_dork['exclude']:
         t_exclude['content'] = t_exclude['content'] + t_dork['exclude']['content']
     if 'filepath' in t_dork['exclude']:
         t_exclude['extension'] = t_exclude['extension'] + t_dork['exclude']['extension']
-    
+
     return t_exclude
 
 def filterResults( t_results, t_exclude, t_filters ):
@@ -256,11 +256,11 @@ def testDork( n_max_page, dork ):
         t_json = githubApiSearchCode( dork, page )
         if not t_json:
             break
-    
+
         n_results = len( t_json['items'] )
         if not n_results:
             break
-        
+
         for result in t_json['items']:
             if result['sha'] == last_sha:
                 # print('last sha found!')
@@ -272,7 +272,7 @@ def testDork( n_max_page, dork ):
         page = page + 1
         if page > n_max_page:
             break
-    
+
     t_exclude = mergeExclude( t_config['exclude'], t_dork )
     t_filtered = filterResults( t_result, t_exclude, ['filepath','extension'] )
     getCodes( t_filtered )

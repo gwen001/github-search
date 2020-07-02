@@ -32,7 +32,7 @@ parser.add_argument( "-p","--page",help="n page to grab, default 10" )
 parser.add_argument( "-r","--resume",help="resume previous session" )
 parser.add_argument( "-i","--input",help="input datas source saved from previous search" )
 parser.add_argument( "-k","--keyword",help="github keyword to search" )
-parser.add_argument( "-o","--token",help="github token" )
+parser.add_argument( "-o","--token",help="your github token" )
 parser.parse_args()
 args = parser.parse_args()
 
@@ -171,13 +171,13 @@ else:
         #     sys.stdout.write( '[+] grabbing page %d/%d... ' %  ((i+1),end_page) )
         #     s_results = goop.search( gg_search, fb_cookie, page=i )
         #     sys.stdout.write( '(%d)\n' %  len(s_results) )
-            
+
         #     for i in s_results:
         #         pseudo = mod.extractPseudoFromUrl( s_results[i]['url'] )
         #         if len(pseudo) and not pseudo in t_history:
         #             t_history.append( pseudo )
         #             t_results.append( s_results[i] )
-    
+
     if f_search_result:
         # save search results
         sys.stdout.write( colored('[+] save search results: %s\n' %  f_search_result, 'green') )
@@ -256,7 +256,7 @@ def doMultiTestLogins( index ):
     employee = t_results[index]
     # if t_stats['n_ghaccount'] >= 5:
     #     break
-    
+
     for login in employee['altlogins']:
         time.sleep( 200/1000 )
         t_stats['counter'] = t_stats['counter'] + 1
@@ -278,7 +278,7 @@ def doMultiTestLogins( index ):
             # show progress
             # sys.stdout.write( 'progress: %d/%d\n' %  (t_stats['counter'],t_stats['n_altlogins']) )
         sys.stdout.write( 'progress: %d/%d\r' %  (t_stats['counter'],t_stats['n_altlogins']) )
-        
+
         if len(t_tokens):
             newghaccount = github.grabUserApi( t_tokens, login )
         else:
@@ -297,7 +297,7 @@ def doMultiTestLogins( index ):
             if len(t_keywords):
                 for keyword in t_keywords:
                     newghaccount['ghsearch'][keyword] = github.githubApiSearchCode( t_tokens, login, keyword )
-            
+
             employee['ghaccount'][login] = newghaccount
         # else:
             # sys.stdout.write( colored('%s\n' %  url, 'white') )
@@ -313,7 +313,7 @@ pool.join()
     # employee = t_results[i]
     # # if t_stats['n_ghaccount'] >= 5:
     # #     break
-    
+
     # for login in employee['altlogins']:
     #     time.sleep( 200/1000 )
     #     t_stats['counter'] = t_stats['counter'] + 1
@@ -325,7 +325,7 @@ pool.join()
     #     if (t_stats['counter']%100) == 0:
     #         # show progress
     #         sys.stdout.write( 'progress: %d/%d\n' %  (t_stats['counter'],t_stats['n_altlogins']) )
-        
+
     #     url = 'https://github.com/'+login
 
     #     if len(t_tokens):
@@ -346,7 +346,7 @@ pool.join()
     #         if len(t_keywords):
     #             for keyword in t_keywords:
     #                 newghaccount['ghsearch'][keyword] = github.githubApiSearchCode( t_tokens, login, keyword )
-            
+
     #         employee['ghaccount'][login] = newghaccount
     #     else:
     #         sys.stdout.write( colored('%s\n' %  url, 'white') )
