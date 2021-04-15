@@ -19,13 +19,13 @@ class GitHubSearch
 	private $search_api_url = '/search/code';
     private $search_api_parameters = '?sort=indexed&order=desc&q=';
     private $search_api_repos = '/repos';
-    
+
 	private $max_result = 100;
 
 	private $search_string = null;
 
 	private $cookie = null;
-	
+
 	private $auth_token = null;
 
 	private $search_commit = false;
@@ -55,7 +55,8 @@ class GitHubSearch
 		$f_tokens = dirname(__FILE__).'/.tokens';
 		if( file_exists($f_tokens) ) {
 			$content = file_get_contents( $f_tokens );
-			$m = preg_match_all( '([a-f0-9]{40})', $content, $matches );
+			$m = preg_match_all( '([a-f0-9]{40}|ghp_[a-zA-Z0-9]{36})', $content, $matches );
+            // var_dump($m);
 			if( $m ) {
 				$this->auth_token = $matches[0];
 			}
@@ -137,7 +138,7 @@ class GitHubSearch
 		return true;
 	}
 
-    
+
 	public function getSearchCommit() {
 		return $this->search_commit;
 	}
@@ -266,14 +267,14 @@ class GitHubSearch
 				echo "\n";
 				return count($this->t_result);
 			}
-			
+
 			if( stristr($r,'abuse detection mechanism') ) {
 				echo "\n";
 				Utils::_println( 'Abuse detection mechanism spotted, breaking...', 'red' );
 				echo "\n";
 				return count($this->t_result);
 			}
-			
+
 			$doc = new \DomDocument();
 			@$doc->loadHTML( $r );
 
@@ -320,7 +321,7 @@ class GitHubSearch
 				}
 
 				$details = $xpath->query('div[contains(@class,"d-inline-block col-10")]/a', $res); // maj 09/04/2017
-				
+
 				$tmp['repository'] = trim( $details[0]->textContent );
 				$tmp['file'] = trim( $details[1]->textContent );
 				$tmp['link'] = self::GITHUB_URL.trim( $details[1]->getAttribute('href') );
@@ -349,7 +350,7 @@ class GitHubSearch
 					break;
 				}
 			}
-			
+
 			usleep( 100000 ); // 1 seconde
 		}
 
@@ -373,7 +374,7 @@ class GitHubSearch
 			$t_headers[] = 'Authorization: token '.$this->auth_token[$i_token];
 		}
 		//var_dump( $t_headers );
-		
+
 		$n_result = 0;
 		$max_page = ceil( $this->max_result / self::GITHUB_API_PAGE_RESULT );
 		//var_dump($max_page);
@@ -384,7 +385,7 @@ class GitHubSearch
 		for( $p=1,$run=true ; $p<=$max_page && $run ; $p++ )
 		{
             usleep( 10000 );
-            
+
 			$url = $this->getSearchApi(true).'&page='.$p;
 			// echo $url."\n";
 
@@ -400,19 +401,19 @@ class GitHubSearch
 			curl_close( $c );
 			//echo strlen($r)."\n";
             //var_dump($r);
-            
+
 			$t_json = json_decode( $r );
 			//file_put_contents( 'result_'.$p.'_json.html', print_r($t_json,true) );
 			//var_dump( $t_json );
 			//var_dump( count($t_json) );
-			
+
 			if( stristr($r,'looks like something went wrong') !=false  || stristr($r,'Only the first 1000 search') !==false ) {
 				echo "\n";
 				Utils::_println( 'Looks like something went wrong, breaking...', 'red' );
 				echo "\n";
 				return count($this->t_result);
 			}
-			
+
 			if( stristr($r,'abuse detection mechanism') !==false || stristr($r,'API rate limit exceeded') !==false ) {
                 echo "\n";
                 Utils::_println( 'Abuse detection mechanism spotted, breaking...', 'red' );
@@ -428,7 +429,7 @@ class GitHubSearch
                     return count($this->t_result);
                 }
 			}
-			
+
 			// number of result
 			if( $p == 1 ) {
 				$n_found = isset($t_json->total_count) ? $t_json->total_count : 0;
@@ -462,11 +463,11 @@ class GitHubSearch
                         'language' => '',
                         'summary' => [],
                     ];
-                    
+
                     $tmp['repository'] = $item->repository->full_name;
                     $tmp['file'] = $item->path;
                     $tmp['link'] = $item->html_url;
-                    
+
 					$l = 0;
 
 					if( isset($item->text_matches) && is_array($item->text_matches) && count($item->text_matches) ) {
@@ -483,7 +484,7 @@ class GitHubSearch
                 }
             }
 		}
-		
+
 		echo "\n";
 
 		return count($this->t_result);
@@ -528,8 +529,8 @@ class GitHubSearch
 			echo "\n\n";
 		}
 	}
-	
-	
+
+
 	private function printStringResult( $line, $str )
 	{
 		if( !$this->color_output ) {
@@ -542,9 +543,9 @@ class GitHubSearch
 		$m = preg_match_all( '#'.$this->string.'#i', $str, $matches, PREG_OFFSET_CAPTURE );
 		//var_dump( $matches );
 		//var_dump( $str );
-		
+
 		Utils::_print( '('.($line>=0?$line:'-').') ', 'yellow' );
-		
+
 		if( $m ) {
 			$n = count( $matches[0] );
 			//var_dump($n);
@@ -558,7 +559,7 @@ class GitHubSearch
 				//break;
 			}
 		}
-		
+
 		$s3 = substr( $str, $p );
 		Utils::_print( $s3, 'green' );
 	}

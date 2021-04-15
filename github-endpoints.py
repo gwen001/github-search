@@ -97,10 +97,10 @@ def githubApiSearchCode( token, search, page, sort, order ):
 
 
 def getRawUrl( result ):
-    raw_url = result['html_url'];
+    raw_url = result['html_url']
     raw_url = raw_url.replace( 'https://github.com/', 'https://raw.githubusercontent.com/' )
     raw_url = raw_url.replace( '/blob/', '/' )
-    return raw_url;
+    return raw_url
 
 
 def readCode( regexp, source, confirm, relative, alldomains, result ):
@@ -128,6 +128,8 @@ def readCode( regexp, source, confirm, relative, alldomains, result ):
                     for endpoint in edpt:
                         endpoint = endpoint.strip()
                         if len(endpoint) >= MIN_LENGTH:
+                            sys.stdout.write("%s\n" % endpoint)
+                            continue
                             goodbye = False
                             for exclude in t_exclude:
                                 if re.match(exclude,endpoint):

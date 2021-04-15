@@ -208,7 +208,7 @@ $t_tokens = [];
 $f_tokens = dirname(__FILE__).'/.tokens';
 if( file_exists($f_tokens) ) {
 	$content = file_get_contents( $f_tokens );
-	$m = preg_match_all( '([a-f0-9]{40})', $content, $matches );
+	$m = preg_match_all( '([a-f0-9]{40}|ghp_[a-zA-Z0-9]{36})', $content, $matches );
 	if( $m ) {
 		$t_tokens = $matches[0];
 	}
@@ -232,7 +232,7 @@ foreach( $t_orguser as $orguser )
 {
 	echo ">>>>> https://github.com/".$orguser."\n";
 	// array_unshift( $t_dorks, $orguser );
-	
+
 	foreach( $t_dorks as $d )
 	{
 		$output = [];
