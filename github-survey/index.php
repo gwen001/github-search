@@ -14,7 +14,7 @@ if( !is_file($f_tokens) ) {
     exit( 'Tokens file not found!' );
 }
 $content = file_get_contents( $f_tokens );
-$m = preg_match_all( '([a-f0-9]{40})', $content, $matches );
+$m = preg_match_all( '([a-f0-9]{40}|ghp_[a-zA-Z0-9]{36})', $content, $matches );
 if( $m ) {
         $t_tokens = $matches[0];
 }
@@ -120,10 +120,10 @@ function doSearchGithub( $dork, $page )
     curl_setopt( $c, CURLOPT_HTTPHEADER, $t_headers );
     $r = curl_exec( $c );
     curl_close( $c );
-    
+
     // var_dump( $r );
     $t_json = json_decode( $r, true );
-    
+
     if( !isset($t_json['total_count']) ) {
         return false;
     } else {
@@ -239,10 +239,10 @@ function getCode( $url )
     curl_setopt( $c, CURLOPT_HTTPHEADER, $t_headers );
     $r = curl_exec( $c );
     curl_close( $c );
-    
+
     // var_dump( $r );
     $t_config = json_decode( $r, true );
-    
+
     if( !isset($t_config['sha']) ) {
         return false;
     } else {
@@ -263,10 +263,10 @@ function getCommitDate( $url )
     curl_setopt( $c, CURLOPT_HTTPHEADER, $t_headers );
     $r = curl_exec( $c );
     curl_close( $c );
-    
+
     // var_dump( $r );
     $t_config = json_decode( $r, true );
-    
+
     if( !isset($t_config['sha']) ) {
         return false;
     } else {
@@ -287,7 +287,7 @@ function getCommitDates( &$t_filtered )
 
         $commit_id = explode( '=', $result['url'] )[1];
         $result['commit_url'] = $result['repository']['url'] . '/git/commits/' . $commit_id;
-        
+
         $result['curl'] = curl_init( $result['commit_url'] );
         curl_setopt( $result['curl'], CURLOPT_RETURNTRANSFER, true );
         curl_setopt( $result['curl'], CURLOPT_HTTPHEADER, $t_headers );
@@ -331,7 +331,7 @@ function getCodes( &$t_filtered )
     {
         $token = $t_tokens[ rand(0,count($t_tokens)-1) ];
         $t_headers = [ 'Authorization: token '.$token, 'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.101 Safari/537.36' ];
-        
+
         $result['curl'] = curl_init( $result['git_url'] );
         curl_setopt( $result['curl'], CURLOPT_RETURNTRANSFER, true );
         curl_setopt( $result['curl'], CURLOPT_HTTPHEADER, $t_headers );
@@ -372,7 +372,7 @@ function getPagesResults( $dork, $max_page )
         $token = $t_tokens[ rand(0,count($t_tokens)-1) ];
         $t_headers = [ 'Authorization: token '.$token, 'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.101 Safari/537.36' ];
         $url = 'https://api.github.com/search/code?sort=indexed&order=desc&page=' . $p . '&q=' . __urlencode($dork);
-        
+
         $t_curl[$p] = curl_init( $url );
         curl_setopt( $t_curl[$p], CURLOPT_RETURNTRANSFER, true );
         curl_setopt( $t_curl[$p], CURLOPT_HTTPHEADER, $t_headers );
@@ -396,7 +396,7 @@ function getPagesResults( $dork, $max_page )
         if( $r )
         {
             $t_json = json_decode( $r, true );
-        
+
             if( isset($t_json['total_count']) ) {
                 $t_results = array_merge( $t_results, $t_json['items'] );
             }
@@ -451,7 +451,7 @@ if( isset($_GET['d']) && isset($t_config['github_dorks'][$_GET['d']]) )
     //     if( !$n_results ) {
     //         break;
     //     }
-        
+
     //     $t_temp = filterResults( $t_results['items'], $t_exclude, ['filepath','extension'] );
     //     getCodes( $t_temp );
     //     $t_temp2 = filterResults( $t_temp, $t_exclude, ['content'] ); // yes yes again ! (content filtering)
