@@ -18,10 +18,11 @@ from multiprocessing.dummy import Pool
 TOKENS_FILE = os.path.dirname(os.path.realpath(__file__))+'/.tokens'
 
 
-def githubApiSearchCode( token, search, page, sort, order ):
+def githubApiSearchCode( token, search, page, sort, order, verbose ):
     headers = { "Authorization":"token "+token }
     url = 'https://api.github.com/search/code?per_page=100&s=' + sort + '&type=Code&o=' + order + '&q=' + search + '&page=' + str(page)
-    print(">>> "+url)
+    if verbose:
+        print(">>> "+url)
 
     try:
         r = requests.get( url, headers=headers, timeout=5 )
@@ -171,7 +172,7 @@ for so in t_sort_order:
 
         # time.sleep( random.random() )
         token = random.choice( t_tokens )
-        t_json = githubApiSearchCode( token, _search, page, so['sort'], so['order'] )
+        t_json = githubApiSearchCode( token, _search, page, so['sort'], so['order'], args.verbose )
 
         if not t_json or 'documentation_url' in t_json or 'message' in t_json:
             if args.verbose:
