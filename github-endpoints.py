@@ -103,7 +103,7 @@ def getRawUrl( result ):
     return raw_url
 
 
-def readCode( regexp, source, confirm, relative, alldomains, result ):
+def readCode( regexp, confirm, display_source, display_relative, display_alldomains, result ):
 
     time.sleep( random.random() )
 
@@ -116,43 +116,53 @@ def readCode( regexp, source, confirm, relative, alldomains, result ):
     t_history_urls.append( url )
     code = doGetCode( url )
     # print( code )
+    # print( regexp )
+    # print( confirm )
+    # print( display_source )
+    # print( display_relative )
+    # print( display_alldomains )
 
     if code:
-        if source:
+        if display_source:
             str = "\n%s>>> %s%s\n\n" % (fg('yellow'),result['html_url'],attr(0))
         matches = re.findall( regexp, code, re.IGNORECASE )
         if matches:
+            # domain found in the code
             for r in t_regexp:
+                # looking for endpoints
                 edpt = re.findall( r, code, re.IGNORECASE )
                 if edpt:
+                    # endpoints found
                     for endpoint in edpt:
                         endpoint = endpoint.strip()
                         if len(endpoint) >= MIN_LENGTH:
-                            sys.stdout.write("%s\n" % endpoint)
-                            continue
+                            # sys.stdout.write("%s\n" % endpoint)
+                            # continue
                             goodbye = False
                             for exclude in t_exclude:
-                                if re.match(exclude,endpoint):
+                                if re.match(exclude,endpoint,re.IGNORECASE):
                                     goodbye = True
                                     break
                             if goodbye:
                                 continue
-                            if endpoint.startswith('http'):
+                            if endpoint.lower().startswith('http'):
                                 is_relative = False
                             else:
                                 is_relative = True
-                            if not relative and is_relative:
+                            if is_relative and not display_relative:
                                 continue
                             if endpoint in t_local_endpoints:
                                 continue
-                            if not source and endpoint in t_endpoints:
-                                continue
-                            if not alldomains and not is_relative:
+                            # ???
+                            # if not display_source and endpoint in t_endpoints:
+                            #     continue
+                            if not display_alldomains and not is_relative:
                                 try:
                                     t_url_parse = urlparse( endpoint )
                                     t_host_parse = tldextract.extract( t_url_parse.netloc )
                                     domain = t_host_parse.domain
-                                    sss = re.findall( regexp, t_url_parse.netloc )
+                                    # print(domain)
+                                    sss = re.findall( regexp, t_url_parse.netloc, re.IGNORECASE )
                                     if not sss:
                                         continue
                                 except Exception as e:
@@ -160,13 +170,16 @@ def readCode( regexp, source, confirm, relative, alldomains, result ):
 
                             t_endpoints.append( endpoint )
                             t_local_endpoints.append( endpoint )
-                            if source:
-                                str = str + ("%s\n" % endpoint)
-                            else:
-                                sys.stdout.write( "%s\n" % endpoint )
+                            str = str + ("%s\n" % endpoint)
+                            # if display_source:
+                            #     str = str + ("%s\n" % endpoint)
+                            # else:
+                            #     sys.stdout.write( "%s\n" % endpoint )
 
-    if source and len(t_local_endpoints):
+    # if display_source and len(t_local_endpoints):
+    if len(t_local_endpoints):
         sys.stdout.write( str )
+
 
 
 def doGetCode( url ):
@@ -257,10 +270,13 @@ else:
     _regexp = r'((([0-9a-z_\-\.]+)\.)?' + _domain.replace('.','\.')+')'
     _confirm = _domain
 
+
 if args.verbose:
     print( "Search: %s" % _search )
     print( "Regexp: %s" % _regexp)
-    print( "Confirm: %s" % readCode)
+    print( "Confirm: %s" % _confirm)
+    print( "Relative urls: %s" % _relative)
+    print( "All domains: %s" % _alldomains)
 
 for so in t_sort_order:
 
@@ -291,8 +307,10 @@ for so in t_sort_order:
 
         if 'items' in t_json and len(t_json['items']):
             pool = Pool( 30 )
-            pool.map( partial(readCode,_regexp,_source,_confirm,_relative,_alldomains), t_json['items'] )
+            pool.map( partial(readCode,_regexp,_confirm,_source,_relative,_alldomains), t_json['items'] )
             pool.close()
             pool.join()
         else:
             break
+
+        exit()
