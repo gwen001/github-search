@@ -30,7 +30,7 @@ Most of the time GitHub requires a token to perform searches.
 
 You can create a `.tokens` file in the cloned repo directory with 1 token per line  
 OR  
-You can configure an environment variable like this: `GIHTHUB_TOKEN=token1,token2,...`
+You can configure an environment variable (recommended) like this: `GIHTHUB_TOKEN=token1,token2,...`
 
 ## Documentation
 
