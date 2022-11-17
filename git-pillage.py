@@ -4,10 +4,6 @@
 # inspired by https://github.com/koto/gitpillage/blob/master/gitpillage.sh
 # example: python3 gitpillage.py -u https://www.example.com -t 10
 
-# I don't believe in license.
-# You can do whatever you want with this program.
-
-
 #
 ### functions
 #

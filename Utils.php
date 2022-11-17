@@ -1,11 +1,5 @@
 <?php
 
-/**
- * I don't believe in license
- * You can do want you want with this program
- * - gwen -
- */
-
 class Utils
 {
 	const TMP_DIR = '/tmp/';

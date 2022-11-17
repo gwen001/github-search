@@ -1,12 +1,6 @@
 #!/usr/bin/php
 <?php
 
-/**
- * I don't believe in license
- * You can do want you want with this program
- * - gwen -
- */
-
 function __autoload( $c ) {
 	include( $c.'.php' );
 }
@@ -56,31 +50,31 @@ set_time_limit( 0 );
 			case 'f':
 				$gsearch->setFilename( $v );
 				break;
-			
+
 			case 'h':
 				Utils::help();
 				break;
-			
+
 			case 'l':
 				$gsearch->setLanguage( $v );
 				break;
-			
+
 			case 'm':
 				$gsearch->searchCommit( true );
 				break;
-			
+
 			case 'n':
 				$gsearch->setColorOutput( false );
 				break;
-			
+
 			case 'o':
 				$gsearch->setOrganization( $v );
 				break;
-			
+
 			case 'p':
 				$gsearch->setRepository( $v );
 				break;
-			
+
 			case 'r':
 				$gsearch->setMaxResult( $v );
 				break;
@@ -97,7 +91,7 @@ set_time_limit( 0 );
 				Utils::help( 'Unknown option: '.$k );
 		}
 	}
-	
+
 	if( !$gsearch->getString() && !$gsearch->getFilename() ) {
 		Utils::help( 'Search param not found, provide at least a filename or a string' );
 	}
@@ -115,7 +109,7 @@ set_time_limit( 0 );
 	} else {
 		$cnt_result = $gsearch->run();
 	}
-	
+
 	if( $cnt_result ) {
 		$gsearch->printResult();
 	}

@@ -105,31 +105,31 @@ function __urlencode( $d ) {
     return $d;
 }
 
-function doSearchGithub( $dork, $page )
-{
-    global $t_tokens;
+// function doSearchGithub( $dork, $page )
+// {
+//     global $t_tokens;
 
-    $token = $t_tokens[ rand(0,count($t_tokens)-1) ];
-    $t_headers = [ 'Authorization: token '.$token, 'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.101 Safari/537.36' ];
-    $url = 'https://api.github.com/search/code?sort=indexed&order=desc&page=' . $page . '&q=' . __urlencode($dork);
-    // echo $url."<br>\n";
+//     $token = $t_tokens[ rand(0,count($t_tokens)-1) ];
+//     $t_headers = [ 'Accept: application/vnd.github.v3+json', 'Authorization: token '.$token, 'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.101 Safari/537.36' ];
+//     $url = 'https://api.github.com/search/code?sort=indexed&order=desc&page=' . $page . '&q=' . __urlencode($dork);
+//     // echo $url."<br>\n";
 
-    $c = curl_init();
-    curl_setopt( $c, CURLOPT_URL, $url );
-    curl_setopt( $c, CURLOPT_RETURNTRANSFER, true );
-    curl_setopt( $c, CURLOPT_HTTPHEADER, $t_headers );
-    $r = curl_exec( $c );
-    curl_close( $c );
+//     $c = curl_init();
+//     curl_setopt( $c, CURLOPT_URL, $url );
+//     curl_setopt( $c, CURLOPT_RETURNTRANSFER, true );
+//     curl_setopt( $c, CURLOPT_HTTPHEADER, $t_headers );
+//     $r = curl_exec( $c );
+//     curl_close( $c );
 
-    // var_dump( $r );
-    $t_json = json_decode( $r, true );
+//     // var_dump( $r );
+//     $t_json = json_decode( $r, true );
 
-    if( !isset($t_json['total_count']) ) {
-        return false;
-    } else {
-        return $t_json;
-    }
-}
+//     if( !isset($t_json['total_count']) ) {
+//         return false;
+//     } else {
+//         return $t_json;
+//     }
+// }
 
 function excludeFusion( $t_config, $dork )
 {
@@ -226,53 +226,53 @@ function isFiltered( $result, $t_exclude, $t_filters )
     return false;
 }
 
-function getCode( $url )
-{
-    global $t_tokens;
+// function getCode( $url )
+// {
+//     global $t_tokens;
 
-    $token = $t_tokens[ rand(0,count($t_tokens)-1) ];
-    $t_headers = [ 'Authorization: token '.$token, 'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.101 Safari/537.36' ];
+//     $token = $t_tokens[ rand(0,count($t_tokens)-1) ];
+//     $t_headers = [ 'Accept: application/vnd.github.v3+json', 'Authorization: token '.$token, 'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.101 Safari/537.36' ];
 
-    $c = curl_init();
-    curl_setopt( $c, CURLOPT_URL, $url );
-    curl_setopt( $c, CURLOPT_RETURNTRANSFER, true );
-    curl_setopt( $c, CURLOPT_HTTPHEADER, $t_headers );
-    $r = curl_exec( $c );
-    curl_close( $c );
+//     $c = curl_init();
+//     curl_setopt( $c, CURLOPT_URL, $url );
+//     curl_setopt( $c, CURLOPT_RETURNTRANSFER, true );
+//     curl_setopt( $c, CURLOPT_HTTPHEADER, $t_headers );
+//     $r = curl_exec( $c );
+//     curl_close( $c );
 
-    // var_dump( $r );
-    $t_config = json_decode( $r, true );
+//     // var_dump( $r );
+//     $t_config = json_decode( $r, true );
 
-    if( !isset($t_config['sha']) ) {
-        return false;
-    } else {
-        return base64_decode( str_replace('\n','',$t_config['content']) );
-    }
-}
+//     if( !isset($t_config['sha']) ) {
+//         return false;
+//     } else {
+//         return base64_decode( str_replace('\n','',$t_config['content']) );
+//     }
+// }
 
-function getCommitDate( $url )
-{
-    global $t_tokens;
+// function getCommitDate( $url )
+// {
+//     global $t_tokens;
 
-    $token = $t_tokens[ rand(0,count($t_tokens)-1) ];
-    $t_headers = [ 'Authorization: token '.$token, 'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.101 Safari/537.36' ];
+//     $token = $t_tokens[ rand(0,count($t_tokens)-1) ];
+//     $t_headers = [ 'Accept: application/vnd.github.v3+json', 'Authorization: token '.$token, 'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.101 Safari/537.36' ];
 
-    $c = curl_init();
-    curl_setopt( $c, CURLOPT_URL, $url );
-    curl_setopt( $c, CURLOPT_RETURNTRANSFER, true );
-    curl_setopt( $c, CURLOPT_HTTPHEADER, $t_headers );
-    $r = curl_exec( $c );
-    curl_close( $c );
+//     $c = curl_init();
+//     curl_setopt( $c, CURLOPT_URL, $url );
+//     curl_setopt( $c, CURLOPT_RETURNTRANSFER, true );
+//     curl_setopt( $c, CURLOPT_HTTPHEADER, $t_headers );
+//     $r = curl_exec( $c );
+//     curl_close( $c );
 
-    // var_dump( $r );
-    $t_config = json_decode( $r, true );
+//     // var_dump( $r );
+//     $t_config = json_decode( $r, true );
 
-    if( !isset($t_config['sha']) ) {
-        return false;
-    } else {
-        return $t_config['committer']['date'];
-    }
-}
+//     if( !isset($t_config['sha']) ) {
+//         return false;
+//     } else {
+//         return $t_config['committer']['date'];
+//     }
+// }
 
 function getCommitDates( &$t_filtered )
 {
@@ -283,7 +283,7 @@ function getCommitDates( &$t_filtered )
     foreach( $t_filtered as &$result )
     {
         $token = $t_tokens[ rand(0,count($t_tokens)-1) ];
-        $t_headers = [ 'Authorization: token '.$token, 'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.101 Safari/537.36' ];
+        $t_headers = [ 'Accept: application/vnd.github.v3+json', 'Authorization: token '.$token, 'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.101 Safari/537.36' ];
 
         $commit_id = explode( '=', $result['url'] )[1];
         $result['commit_url'] = $result['repository']['url'] . '/git/commits/' . $commit_id;
@@ -330,7 +330,7 @@ function getCodes( &$t_filtered )
     foreach( $t_filtered as &$result )
     {
         $token = $t_tokens[ rand(0,count($t_tokens)-1) ];
-        $t_headers = [ 'Authorization: token '.$token, 'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.101 Safari/537.36' ];
+        $t_headers = [ 'Accept: application/vnd.github.v3+json', 'Authorization: token '.$token, 'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.101 Safari/537.36' ];
 
         $result['curl'] = curl_init( $result['git_url'] );
         curl_setopt( $result['curl'], CURLOPT_RETURNTRANSFER, true );
@@ -370,8 +370,10 @@ function getPagesResults( $dork, $max_page )
     for( $p=0 ; $p<$max_page ; $p++ )
     {
         $token = $t_tokens[ rand(0,count($t_tokens)-1) ];
-        $t_headers = [ 'Authorization: token '.$token, 'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.101 Safari/537.36' ];
+        $t_headers = [ 'Accept: application/vnd.github.v3+json', 'Authorization: token '.$token, 'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.101 Safari/537.36' ];
         $url = 'https://api.github.com/search/code?sort=indexed&order=desc&page=' . $p . '&q=' . __urlencode($dork);
+        // var_dump($url);
+        // exit();
 
         $t_curl[$p] = curl_init( $url );
         curl_setopt( $t_curl[$p], CURLOPT_RETURNTRANSFER, true );
@@ -407,13 +409,13 @@ function getPagesResults( $dork, $max_page )
 }
 
 
-if( isset($_GET['d']) && isset($t_config['github_dorks'][$_GET['d']]) )
+if( isset($_GET['d']) /*&& isset($t_config['github_dorks'][$_GET['d']])*/ )
 {
     $n_desired = 0;
     // $current_page = 0;
     $max_page = isset($_GET['p']) ? (int)$_GET['p'] : DEFAULT_MAX_PAGE;
 
-    if( !is_array($t_config['github_dorks'][$_GET['d']]) ) {
+    if( !isset($t_config['github_dorks'][$_GET['d']]) || !is_array($t_config['github_dorks'][$_GET['d']]) ) {
         $t_config['github_dorks'][$_GET['d']] = [
             'title' => 'github search code \'' . $_GET['d'] . '\'',
             'info' => 'https://github.com/search?o=desc&s=indexed&type=Code&q=' . urlencode($_GET['d']),
@@ -537,6 +539,7 @@ if( isset($_GET['a']) && $_GET['a'] == 'runsurvey' )
             body {
                 margin-left: 15px;
                 margin-top: 15px;
+                font-size: 0.8rem;
             }
             .result {
                 margin-bottom: 20px;
@@ -549,6 +552,10 @@ if( isset($_GET['a']) && $_GET['a'] == 'runsurvey' )
             .result_path {
 
             }
+            .result_clear {
+                clear: both;
+                margin-bottom: 5px;
+            }
             .result_size {
                 font-size: 0.8em;
             }
@@ -560,7 +567,7 @@ if( isset($_GET['a']) && $_GET['a'] == 'runsurvey' )
                 border: 1px solid #CCC;
                 border-radius: 3px;
                 font-size: 0.8em;
-                max-height: 300px;
+                max-height: 200px;
                 margin-bottom: 0px;
                 overflow: scroll;
                 padding: 10px;
@@ -623,8 +630,8 @@ if( isset($_GET['a']) && $_GET['a'] == 'runsurvey' )
                     <?php foreach( $t_filtered as $result ) { ?>
                         <div class="result <?php if( $result['sha']==$t_config['github_dorks'][$_GET['d']]['last_sha'] ) { echo 'lastsha'; }; ?>" data-sha="<?php echo $result['sha']; ?>" data-full-path="<?php echo $result['repository']['full_name'].'/'.$result['path']; ?>">
                             <div class="result_action">
-                                <a href="javascript:setLastSha('<?php echo $result['sha']; ?>');" title="exclude user"><img src="img/macro_names.png" title="set as last viewed" /></a>
-                                <input type="text" size="10" name="exclude_string" placeholder="exclude results with string..." />
+                                <a href="javascript:setLastSha('<?php echo $result['sha']; ?>');" title="set as last viewed"><img src="img/macro_names.png" title="set as last viewed" /></a>
+                                <input type="text" size="25" name="exclude_string" placeholder="exclude results with string..." />
                                 <input type="submit" name="btn_exclude_string" class="btn-exclude-string" value="EX" />
                                 <a href="javascript:excludeFilepath('<?php echo $result['repository']['full_name'].'/'.$result['path']; ?>');" title="exclude file"><img src="img/page_delete.png" title="exclude file" /></a>
                                 <a href="javascript:excludeFilepath('<?php echo $result['repository']['full_name']; ?>');" title="exclude repository"><img src="img/folder_delete.png" title="exclude repository" /></a>
@@ -638,6 +645,7 @@ if( isset($_GET['a']) && $_GET['a'] == 'runsurvey' )
                                     <span class="result_size">(<?php echo format_bytes(strlen($result['code'])); ?>)</span>
                                 <?php } ?>
                             </div>
+                            <div class="result_clear"></div>
                             <?php if( isset($result['code']) ) { ?>
                                 <pre class="result_code"><?php echo highlightCode($result['code']); ?></pre>
                             <?php } ?>
