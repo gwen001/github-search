@@ -4,7 +4,7 @@
 t_keywords=(
 	"passwd"
 	"password"
-	"key"
+	# "key"
 	"secret"
 	"apikey"
 	"api_key",
@@ -22,6 +22,8 @@ t_keywords=(
 	"digitaloceanspaces.com"
 	"cloudfront.net"
 	"blob.core.windows.net"
+    'ghp_'
+    'AKIA[A-Z0-9]{16}'
 )
 
 
@@ -61,9 +63,9 @@ fi
 
 cd $repo
 echo "Running reflog..."
-git log --reflog > reflog.txt
+git log --reflog -p > reflog.txt
 echo
 
 for w in  ${t_keywords[@]} ; do
-	grep -n --color "$w" reflog.txt -A 5 -B 5
+	egrep -n --color "$w" reflog.txt -A 5 -B 5
 done
