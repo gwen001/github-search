@@ -1,0 +1,24 @@
+{
+    "exclude": {
+        "content": [],
+        "extension": [],
+        "filepath": [
+            "podspec.json"
+        ]
+    },
+    "projects": {
+        "mindgeek": {
+            "dorks": {
+                "mgcorp.co": {
+                    "last_sha": "",
+                    "data": 0,
+                    "exclude": {
+                        "filepath": [],
+                        "content": [],
+                        "extension": []
+                    }
+                }
+            }
+        }
+    }
+}

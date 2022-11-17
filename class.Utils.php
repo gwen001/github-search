@@ -26,18 +26,25 @@ class Utils
 
 	public static function help( $error='' )
 	{
-		if( is_file(__DIR__.'/README.md') ) {
-			$help = file_get_contents( __DIR__.'/README.md' )."\n";
-			preg_match_all( '#```(.*)```#s', $help, $matches );
-			if( count($matches[1]) ) {
-				echo trim($matches[1][0])."\n\n";
-			}
-		} else {
-			echo "No help found!\n";
-		}
+        print("Usage: php github-search.php [OPTIONS]
 
-		if( $error ) {
-			echo "Error: ".$error."!\n";
+Options:
+    -c	set cookie session
+    -e	file extension filter
+    -f	looking for file
+    -h	print this help
+    -l	language filter
+    -m	look for commit, -o and -p are required
+    -n	no color
+    -p	provide repository name
+    -o	provide organization name
+    -r	maximum number of results, default 100
+    -s	search string
+    -t	set authorization token (overwrite cookie, best option)
+");
+
+        if( $error ) {
+			echo "\nError: ".$error."!\n";
 		}
 
 		exit();

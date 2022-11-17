@@ -61,7 +61,7 @@ for r in $lrepo ; do
 		if [ $fname -eq 1 ] ; then
 			echo $idx
 		fi
-		
+
 		# git show-index < "$idx"
 		t_obj=$(git show-index < "$idx" | awk '{print $2}')
 		# echo $t_obj
@@ -70,11 +70,11 @@ for r in $lrepo ; do
 			if [ $fname -eq 1 ] ; then
 				echo $obj
 			fi
-			
+
 			# content=$(git cat-file -p $obj)
 			# in order to save time, search only occurs on first 1M
 			content=$(git cat-file -p $obj | head -c1000000)
-			
+
 			# size=$(echo $content | wc -c)
 			# echo $size
 			# if [ $size -gt 1500000 ] ; then

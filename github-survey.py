@@ -42,9 +42,15 @@ else:
 
 ########### GITHUB SEARCH CODE
 def loadTokens( token_file ):
-    tokens_file = os.path.dirname(os.path.realpath(__file__)) + token_file
-    if os.path.isfile(tokens_file):
-        return open(tokens_file,'r').read().strip().split("\n")
+    t_tokens = []
+    gh_env =  os.getenv('GITHUB_TOKEN')
+    if gh_env:
+        t_tokens = gh_env.strip().split(',')
+    else:
+        tokens_file = os.path.dirname(os.path.realpath(__file__)) + token_file
+        if os.path.isfile(tokens_file):
+            t_tokens = open(tokens_file,'r').read().strip().split("\n")
+    return t_tokens
 
 def githubApiSearchCode( dork, confirm=False ):
     if confirm:

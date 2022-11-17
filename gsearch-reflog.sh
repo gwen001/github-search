@@ -26,7 +26,7 @@ t_keywords=(
 
 
 function usage {
-    echo "Usage: "$0" <repository>"
+    echo "Usage: "$0" <repository url>"
     if [ -n "$1" ] ; then
 		echo "Error: "$1"!"
     fi
@@ -62,7 +62,7 @@ fi
 cd $repo
 echo "Running reflog..."
 git log --reflog > reflog.txt
-echo 
+echo
 
 for w in  ${t_keywords[@]} ; do
 	grep -n --color "$w" reflog.txt -A 5 -B 5

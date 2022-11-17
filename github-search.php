@@ -1,9 +1,9 @@
 #!/usr/bin/php
 <?php
 
-function __autoload( $c ) {
-	include( $c.'.php' );
-}
+spl_autoload_register(function ( $c ) {
+	include( dirname(__FILE__).'/class.'.$c.'.php' );
+});
 
 
 set_time_limit( 0 );

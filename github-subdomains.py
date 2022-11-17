@@ -93,13 +93,20 @@ parser.parse_args()
 args = parser.parse_args()
 
 t_tokens = []
+
 if args.token:
     t_tokens = args.token.split(',')
 else:
-    if os.path.isfile(TOKENS_FILE):
-        fp = open(TOKENS_FILE,'r')
-        t_tokens = fp.read().split("\n")
-        fp.close()
+    gh_env =  os.getenv('GITHUB_TOKEN')
+    if gh_env:
+        t_tokens = gh_env.strip().split(',')
+    else:
+        if os.path.isfile(TOKENS_FILE):
+            fp = open(TOKENS_FILE,'r')
+            for line in fp:
+                r = re.search( '^([a-f0-9]{40}|ghp_[a-zA-Z0-9]{36})$', line )
+                if r:
+                    t_tokens.append( r.group(1) )
 
 if not len(t_tokens):
     parser.error( 'auth token is missing' )

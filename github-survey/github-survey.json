@@ -1,0 +1,31 @@
+{
+    "exclude": {
+        "content": [],
+        "extension": [],
+        "filepath": []
+    },
+    "github_dorks": {
+        "10degres.net": {
+            "title": "github search code '10degres.net'",
+            "info": "https:\/\/github.com\/search?o=desc&s=indexed&type=Code&q=10degres.net",
+            "last_sha": "",
+            "data": 0,
+            "exclude": {
+                "filepath": [],
+                "content": [],
+                "extension": []
+            }
+        },
+        "10degres.net xss": {
+            "title": "github search code '10degres.net xss'",
+            "info": "https:\/\/github.com\/search?o=desc&s=indexed&type=Code&q=10degres.net+xss",
+            "last_sha": "",
+            "data": 0,
+            "exclude": {
+                "filepath": [],
+                "content": [],
+                "extension": []
+            }
+        }
+    }
+}

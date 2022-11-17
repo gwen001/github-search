@@ -514,9 +514,11 @@ class GitHubSearch
 			if( !count($r['summary']) ) {
 				echo "\t-";
 			} else {
-				for ($i = 0; list($line, $s) = each($r['summary']); $i++) {
+                $i = 0;
+				foreach( $r['summary'] as $line=>$s ) {
 					echo (($i == 0) ? "\t" : "\n\t\t");
 					$this->printStringResult( $line, $s );
+                    $i++;
 				}
 			}
 			echo "\nlink:\t\t".($r['link']?$r['link']:'-');

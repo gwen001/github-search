@@ -1,7 +1,7 @@
 #!/usr/bin/php
 <?php
 
-include( 'Utils.php' );
+include( 'class.Utils.php' );
 
 $gh_url = 'https://github.com/search?o=desc&s=indexed&type=Code&q=';
 
@@ -205,13 +205,19 @@ if( $_SERVER['argc'] == 4 ) {
 // var_dump( $t_dorks );
 
 $t_tokens = [];
-$f_tokens = dirname(__FILE__).'/.tokens';
-if( file_exists($f_tokens) ) {
-	$content = file_get_contents( $f_tokens );
-	$m = preg_match_all( '([a-f0-9]{40}|ghp_[a-zA-Z0-9]{36})', $content, $matches );
-	if( $m ) {
-		$t_tokens = $matches[0];
-	}
+$gh_env = getenv('GITHUB_TOKEN');
+if( $gh_env ) {
+    $t_tokens = explode(',',$gh_env);
+}
+else {
+    $f_tokens = dirname(__FILE__).'/.tokens';
+    if( file_exists($f_tokens) ) {
+        $content = file_get_contents( $f_tokens );
+        $m = preg_match_all( '([a-f0-9]{40}|ghp_[a-zA-Z0-9]{36})', $content, $matches );
+        if( $m ) {
+            $t_tokens = $matches[0];
+        }
+    }
 }
 if( !count($t_tokens) ) {
 	usage( 'auth token is missing' );
@@ -253,7 +259,7 @@ foreach( $t_orguser as $orguser )
 
 			if( $l_token >= 0 ) {
 				usleep( 5000 );
-				$cmd = 'github-search -n -t '.$t_tokens[rand(0,$l_token)].' -r 10 -s "'.$d.'" | grep "result(s) found"';
+				$cmd = 'php github-search.php -n -t '.$t_tokens[rand(0,$l_token)].' -r 10 -s "'.$d.'" | grep "result(s) found"';
 				// echo $cmd."\n";
 				exec( $cmd, $output );
 
