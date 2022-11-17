@@ -3,7 +3,9 @@
 <h4 align="center">A collection of tools to perform searches on GitHub.</h4>
 
 <p align="center">
+    <img src="https://img.shields.io/badge/-bash-gray" alt="bash badge">
     <img src="https://img.shields.io/badge/python-v3-blue" alt="python badge">
+    <img src="https://img.shields.io/badge/php-%3E=5.5-blue" alt="php badge">
     <img src="https://img.shields.io/badge/license-MIT-green" alt="MIT license badge">
     <a href="https://twitter.com/intent/tweet?text=https%3a%2f%2fgithub.com%2fgwen001%2fgithub-search%2f" target="_blank"><img src="https://img.shields.io/twitter/url?style=social&url=https%3A%2F%2Fgithub.com%2Fgwen001%2Fgithub-search" alt="twitter badge"></a>
 </p>
@@ -24,15 +26,15 @@ cd github-search
 pip3 install -r requirements.txt
 ```
 
-Most of the time GitHub requies a token to perform searches.  
+Most of the time GitHub requires a token to perform searches.  
+
 You can create a `.tokens` file in the cloned repo directory with 1 token per line  
 OR  
 You can configure an environment variable like this: `GIHTHUB_TOKEN=token1,token2,...`
 
-## Usage
+## Documentation
 
-Documentation here: http://10degres.net/github-tools-collection/  
-  
+https://10degres.net/github-tools-collection/
 
 ---
 
