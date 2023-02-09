@@ -14,7 +14,7 @@ if( !is_file($f_tokens) ) {
     exit( 'Tokens file not found!' );
 }
 $content = file_get_contents( $f_tokens );
-$m = preg_match_all( '([a-f0-9]{40}|ghp_[a-zA-Z0-9]{36})', $content, $matches );
+$m = preg_match_all( '([a-f0-9]{40}|ghp_[a-zA-Z0-9]{36}|github_pat_[_a-zA-Z0-9]{82})', $content, $matches );
 if( $m ) {
         $t_tokens = $matches[0];
 }

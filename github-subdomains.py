@@ -104,7 +104,7 @@ else:
         if os.path.isfile(TOKENS_FILE):
             fp = open(TOKENS_FILE,'r')
             for line in fp:
-                r = re.search( '^([a-f0-9]{40}|ghp_[a-zA-Z0-9]{36})$', line )
+                r = re.search( '^([a-f0-9]{40}|ghp_[a-zA-Z0-9]{36}|github_pat_[_a-zA-Z0-9]{82})$', line )
                 if r:
                     t_tokens.append( r.group(1) )
 

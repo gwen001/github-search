@@ -23,6 +23,7 @@ t_keywords=(
 	"cloudfront.net"
 	"blob.core.windows.net"
     'ghp_'
+    'github_pat_'
     'AKIA[A-Z0-9]{16}'
 )
 
